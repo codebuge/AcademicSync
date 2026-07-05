@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' blob: data: https://*.supabase.co https://*.supabase.in",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co",
+              "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.railway.app",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
