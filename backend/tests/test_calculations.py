@@ -1,4 +1,5 @@
 import pytest
+from typing import Optional
 from app.db.models import Mark, User, GradingScaleRow
 from app.services.calculations import calculate_gpa, calculate_cgpa, get_cgpa_projection, score_to_gpa
 import os
