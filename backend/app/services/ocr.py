@@ -18,16 +18,21 @@ try:
 except ImportError:
     HTTPX_AVAILABLE = False
 
-import redis
+try:
+    from upstash_redis import Redis as UpstashRedis
+    UPSTASH_AVAILABLE = True
+except ImportError:
+    UPSTASH_AVAILABLE = False
 
 # Redis rate limit client setup
 redis_client = None
 try:
-    redis_url = os.getenv("REDIS_URL")
-    if redis_url:
-        redis_client = redis.from_url(redis_url)
+    upstash_url = os.getenv("UPSTASH_REDIS_REST_URL")
+    upstash_token = os.getenv("UPSTASH_REDIS_REST_TOKEN")
+    if UPSTASH_AVAILABLE and upstash_url and upstash_token:
+        redis_client = UpstashRedis(url=upstash_url, token=upstash_token)
 except Exception as e:
-    print(f"Failed to connect to Redis: {e}")
+    print(f"Failed to connect to Upstash Redis: {e}")
 
 # In-memory rate limiting fallback
 memory_rates = {}
