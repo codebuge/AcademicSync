@@ -21,7 +21,7 @@ export default function TranscriptPage() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const base = '/api'
       const res = await fetch(`${base}/transcripts`, { headers: { Authorization: `Bearer ${session.access_token}` } })
       if (res.ok) setTranscripts(await res.json())
     } finally { setLoading(false) }
@@ -48,7 +48,7 @@ export default function TranscriptPage() {
       const formData = new FormData()
       formData.append('file', file)
       if (semester) formData.append('semester', semester)
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const base = '/api'
       const res = await fetch(`${base}/transcripts`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },

@@ -99,7 +99,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push('/login'); return }
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/users/me`, {
+      fetch('/api/users/me', {
         headers: { Authorization: `Bearer ${data.user.id}` },
       })
         .then(r => r.ok ? r.json() : null)

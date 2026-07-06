@@ -22,8 +22,8 @@ export default function DashboardPage() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
+      const base = '/api'
       const token = session.access_token
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       const headers = { Authorization: `Bearer ${token}` }
 
       const [cgpaRes, marksRes, analysisRes] = await Promise.all([

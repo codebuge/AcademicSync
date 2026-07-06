@@ -43,7 +43,7 @@ export default function MarksPage() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const base = '/api'
       const res = await fetch(`${base}/marks`, { headers: { Authorization: `Bearer ${session.access_token}` } })
       if (res.ok) setMarks(await res.json())
     } finally { setLoading(false) }
@@ -58,7 +58,7 @@ export default function MarksPage() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const base = '/api'
       const res = await fetch(`${base}/marks`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
@@ -95,7 +95,7 @@ export default function MarksPage() {
       if (!session) return
       const formData = new FormData()
       formData.append('file', file)
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const base = '/api'
       const res = await fetch(`${base}/ocr/extract`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -117,7 +117,7 @@ export default function MarksPage() {
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
-    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    const base = '/api'
     let added = 0
     for (const m of confirmedMarks) {
       const res = await fetch(`${base}/marks`, {

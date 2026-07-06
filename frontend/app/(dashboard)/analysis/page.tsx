@@ -54,7 +54,7 @@ export default function AnalysisPage() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const base = '/api'
       let url = `${base}/analysis`
       if (target !== undefined && remaining !== undefined) url += `?target=${target}&remaining=${remaining}`
       const res = await fetch(url, { headers: { Authorization: `Bearer ${session.access_token}` } })

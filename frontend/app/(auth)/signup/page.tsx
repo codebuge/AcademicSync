@@ -58,9 +58,7 @@ export default function SignupPage() {
       formData.append('full_name', data.full_name)
       formData.append('current_semester', String(data.current_semester))
       formData.append('grading_scale_image', gradingFile)
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const res = await fetch(`${apiUrl}/auth/signup`, { method: 'POST', body: formData })
+      const res = await fetch('/api/auth/signup', { method: 'POST', body: formData })
       const body = await res.json()
 
       if (!res.ok) {
