@@ -33,9 +33,8 @@ async function getSupabaseToken(): Promise<string | null> {
 async function proxyRequest(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
-  // Strip the /api prefix to get the backend path
-  const backendPath = pathname.replace(/^\/api/, '')
-  const targetUrl = `${BACKEND_URL}${backendPath}${search}`
+  // Forward the full path as-is — backend is mounted at /api (API_V1_STR)
+  const targetUrl = `${BACKEND_URL}${pathname}${search}`
 
   // Get the auth token from Supabase session
   const token = await getSupabaseToken()
