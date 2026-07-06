@@ -32,13 +32,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Trusted Host Middleware (for Railway domain security)
-if settings.RAILWAY_ENVIRONMENT:
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=["*.railway.app", "localhost", "127.0.0.1"]
-    )
-
 # Include API endpoints
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
