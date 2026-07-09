@@ -29,8 +29,10 @@ export function GPAChart({ data }: GPAChartProps) {
   }))
 
   return (
-    <ResponsiveContainer width="100%" height={200}>
-      <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
+    <div className="h-48 lg:h-64 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
+
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
         <XAxis
           dataKey="semester"
@@ -66,5 +68,7 @@ export function GPAChart({ data }: GPAChartProps) {
         />
       </LineChart>
     </ResponsiveContainer>
+    </div>
   )
 }
+

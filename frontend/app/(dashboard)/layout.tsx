@@ -9,7 +9,7 @@ import { useAppStore } from '@/store/useAppStore'
 import { LayoutDashboard, BookOpen, FileText, TrendingUp, LogOut, Menu, X, GraduationCap, ChevronRight } from 'lucide-react'
 
 const navItems = [
-  { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/marks', icon: BookOpen, label: 'Marks' },
   { href: '/transcript', icon: FileText, label: 'Transcript' },
   { href: '/analysis', icon: TrendingUp, label: 'Analysis' },
@@ -24,7 +24,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     const supabase = createClient()
     await supabase.auth.signOut()
     clearStore()
-    router.push('/login')
+    router.push('/')
   }
 
   return (
@@ -91,8 +91,19 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { user, setUser, semesterGuardVisible, hideSemesterGuard } = useAppStore()
+  const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loading, setLoading] = useState(!user)
+
+  const titleMap: Record<string, string> = {
+    '/dashboard': 'Dashboard',
+    '/marks': 'Marks Entry',
+    '/transcript': 'Transcript Upload',
+    '/analysis': 'GPA Analysis',
+    '/settings': 'Settings'
+  }
+  const pageTitle = titleMap[pathname] || 'AcademicSync'
+
 
   useEffect(() => {
     if (user) { setLoading(false); return }
@@ -145,7 +156,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             onClick={() => setMobileOpen(true)}>
             <Menu size={20} style={{ color: 'var(--foreground)' }} />
           </button>
+          <span className="font-semibold text-sm lg:hidden" style={{ color: 'var(--foreground)' }}>
+            {pageTitle}
+          </span>
           <div className="flex-1" />
+
           {user && (
             <div className="flex items-center gap-3">
               <span className="text-sm hidden sm:block" style={{ color: 'var(--muted-foreground)' }}>

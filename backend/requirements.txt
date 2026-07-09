@@ -17,3 +17,9 @@ pytest>=7.0.0
 upstash-redis>=1.0.0
 pyjwt>=2.8.0
 supabase>=2.0.0
+pytest-html
+pytest-cov
+pytest-ordering
+python-dotenv
+fpdf2
+

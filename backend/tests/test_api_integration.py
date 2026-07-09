@@ -33,7 +33,7 @@ class TestAuthEndpoints:
         
         # Try again with same email
         response = client.post("/api/auth/signup", data=data, files=files)
-        assert response.status_code == 400
+        assert response.status_code == 409
         assert "Email already registered" in response.json()["detail"]
 
     def test_login_success(self, client, mock_png_bytes):
@@ -61,7 +61,7 @@ class TestAuthEndpoints:
             "password": "wrongpassword"
         }
         response = client.post("/api/auth/login", data=login_data)
-        assert response.status_code == 400
+        assert response.status_code == 401
 
 
 class TestUserEndpoints:
@@ -78,7 +78,7 @@ class TestUserEndpoints:
 
 
 class TestMarksEndpoints:
-    def test_create_mark_denied_to_student(self, client, auth_headers):
+    def test_create_mark_success_for_student(self, client, auth_headers):
         response = client.post("/api/marks", json={
             "course_name": "CS101",
             "score": 95.0,
@@ -86,8 +86,8 @@ class TestMarksEndpoints:
             "semester": "Fall 2024",
             "credit_hours": 3.0
         }, headers=auth_headers)
-        # Students should be denied (only teacher/admin can create marks)
-        assert response.status_code == 403
+        assert response.status_code == 201
+        assert response.json()["course_name"] == "CS101"
 
 
 class TestOcrEndpoint:

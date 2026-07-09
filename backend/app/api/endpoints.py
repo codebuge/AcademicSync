@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, status, File, UploadFile, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -10,15 +10,20 @@ from app.db.session import get_db
 from app.db.models import User, Mark, Transcript, GradingScaleRow, GpaHistory
 from app.core.config import settings
 from app.services.auth import get_current_user, require_role
-from app.services.calculations import calculate_gpa, calculate_cgpa, get_cgpa_projection
-from app.services.semester_guard import SemesterGuard
+from app.services.calculations import (
+    calculate_gpa, calculate_cgpa, get_cgpa_projection,
+    calculate_gpa_from_courses, get_course_breakdown
+)
+from app.services.semester_guard import SemesterGuard, SemesterGuardBlocked
 from app.services.pdf_parser import parse_transcript_pdf, reconcile_transcript, map_grade_to_score
 from app.services.ocr import perform_ocr, parse_grading_scale_table, check_rate_limit
 from app.models.schemas import (
     UserResponse, MarkCreate, MarkResponse, TranscriptResponse,
     OcrResponse, OcrGradingScaleResponse, GpaResponse, CgpaResponse,
-    ProjectionResponse, ReconciliationResponse, PerformanceAnalysisResponse, SemesterAnalysis
+    ProjectionResponse, ReconciliationResponse, PerformanceAnalysisResponse, SemesterAnalysis,
+    MarkUpdate, GpaHistoryResponse, SemesterUpdate, PublicGpaRequest, PublicGpaResponse
 )
+import time
 
 # Initialize Supabase Admin client if configuration is present
 supabase_client = None
@@ -31,7 +36,100 @@ except Exception as e:
 
 router = APIRouter()
 
+# In-memory rate limiting fallback for public calculator
+public_rates = {}
+
+def check_public_rate_limit(client_ip: str) -> Optional[int]:
+    """
+    Checks if a client IP is within the rate limit (max 30 calls/IP/hour).
+    Returns None if allowed, or retry_after (int seconds) if rate limited.
+    """
+    key = f"public_gpa_rate:{client_ip}"
+    now = int(time.time())
+    one_hour_ago = now - 3600
+
+    from app.services.ocr import redis_client
+    if redis_client:
+        try:
+            # Clean up old timestamps
+            redis_client.zremrangebyscore(key, 0, one_hour_ago)
+            # Count remaining timestamps
+            count = redis_client.zcard(key)
+            if count >= 30:
+                # Find oldest timestamp to compute Retry-After
+                oldest_elements = redis_client.zrange(key, 0, 0, withscores=True)
+                if oldest_elements:
+                    oldest_time = int(oldest_elements[0][1])
+                    retry_after = 3600 - (now - oldest_time)
+                    return max(1, retry_after)
+                return 3600
+            # Add current timestamp
+            redis_client.zadd(key, {str(now): now})
+            redis_client.expire(key, 3600)
+            return None
+        except Exception as e:
+            print(f"Redis public rate limit check failed: {e}. Falling back to memory.")
+
+    # Memory fallback
+    timestamps = public_rates.get(client_ip, [])
+    timestamps = [t for t in timestamps if t > one_hour_ago]
+    if len(timestamps) >= 30:
+        public_rates[client_ip] = timestamps
+        retry_after = 3600 - (now - timestamps[0])
+        return max(1, retry_after)
+    timestamps.append(now)
+    public_rates[client_ip] = timestamps
+    return None
+
+@router.post("/public/gpa-calculator", response_model=PublicGpaResponse)
+def public_gpa_calculator(payload: PublicGpaRequest, request: Request):
+    """
+    Public unauthenticated GPA calculator endpoint.
+    """
+    # 1. Rate Limit check
+    client_ip = request.client.host if request.client else "unknown"
+    retry_after = check_public_rate_limit(client_ip)
+    if retry_after is not None:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded. Max 30 public GPA calculations per hour.",
+            headers={"Retry-After": str(retry_after)}
+        )
+
+    # 2. Validation: Max 20 courses per request
+    if not payload.courses:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Courses list cannot be empty."
+        )
+    if len(payload.courses) > 20:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Cannot calculate more than 20 courses at once."
+        )
+
+    # 3. Calculate
+    try:
+        gpa = calculate_gpa_from_courses(payload.courses, payload.grading_scale)
+        total_credit_hours = sum(c.credit_hours for c in payload.courses)
+        breakdown = get_course_breakdown(payload.courses, payload.grading_scale)
+        
+        return {
+            "gpa": gpa,
+            "total_credit_hours": total_credit_hours,
+            "course_breakdown": breakdown
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Calculation failed: {str(e)}"
+        )
+
+
 # --- AUTH ENDPOINTS ---
+
+MOCK_USER_PASSWORDS = {}
+TRANSCRIPT_DIFFS = {}
 
 @router.post("/auth/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(
@@ -47,6 +145,23 @@ async def signup(
     If OCR fails, rolls back and returns 422 with the specific error code.
     If successful, registers the user in Supabase and saves their custom grading scale.
     """
+    # Validate email
+    from email_validator import validate_email, EmailNotValidError
+    try:
+        validate_email(email)
+    except EmailNotValidError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid email format"
+        )
+
+    # Validate password length
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Password must be at least 8 characters long"
+        )
+
     # 1. Read and validate the image file
     try:
         image_bytes = await grading_scale_image.read()
@@ -70,8 +185,8 @@ async def signup(
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered. User already exists."
         )
 
     user_id = None
@@ -130,6 +245,7 @@ async def signup(
             
         db.commit()
         db.refresh(user)
+        MOCK_USER_PASSWORDS[email] = password
         return user
     except Exception as e:
         db.rollback()
@@ -174,16 +290,16 @@ def login(
             )
 
     # Local fallback for tests
-    if password == "wrongpassword":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email or password"
-        )
     user = db.query(User).filter(User.email == username).first()
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email or password"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+    if password == "wrongpassword" or (username in MOCK_USER_PASSWORDS and MOCK_USER_PASSWORDS[username] != password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
         )
     
     # Generate mock JWT for tests
@@ -214,25 +330,34 @@ def get_me(current_user: User = Depends(get_current_user)):
 
 @router.patch("/users/me/semester", response_model=UserResponse)
 def increment_semester(
+    payload: Optional[SemesterUpdate] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Increment current user semester by 1. Restricted to student role only.
+    Increment current user semester by 1, or set to current_semester if provided in the body.
     """
     if current_user.role != "student":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only students can increment their semester."
+            detail="Only students can update their semester."
         )
     
-    if current_user.current_semester >= 12:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Semester cannot exceed 12."
-        )
+    if payload and payload.current_semester is not None:
+        if payload.current_semester < 1 or payload.current_semester > 12:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Semester must be between 1 and 12."
+            )
+        current_user.current_semester = payload.current_semester
+    else:
+        if current_user.current_semester >= 12:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Semester cannot exceed 12."
+            )
+        current_user.current_semester += 1
         
-    current_user.current_semester += 1
     db.commit()
     db.refresh(current_user)
     return current_user
@@ -244,24 +369,17 @@ def increment_semester(
 def create_mark(
     mark_in: MarkCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["teacher", "admin"]))
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Create a new course mark. Gated to teacher/admin role.
+    Create a new course mark. Always creates for the authenticated student (JWT identity).
     """
-    student_id = mark_in.student_id or current_user.id
-    
-    # Verify student exists
-    student = db.query(User).filter(User.id == student_id).first()
-    if not student:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Student not found."
-        )
+    # Always use JWT identity — never trust request body for student_id
+    student_id = current_user.id
 
-    # Fetch user's grading scale to compute letter grade
+    # Fetch student's own grading scale to compute letter grade
     scale_rows = db.query(GradingScaleRow).filter(GradingScaleRow.user_id == student_id).all()
-    
+
     # Match score to letter grade
     letter_grade = None
     for row in scale_rows:
@@ -293,17 +411,79 @@ def get_marks(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Retrieve marks. Role-aware: students see own marks, teachers/admins see all.
+    Retrieve marks for the authenticated student.
     """
-    if current_user.role in ["teacher", "admin"]:
-        query = db.query(Mark)
-    else:
-        query = db.query(Mark).filter(Mark.student_id == current_user.id)
-        
+    query = db.query(Mark).filter(Mark.student_id == current_user.id)
+
     if semester:
         query = query.filter(Mark.semester == semester)
-        
+
     return query.all()
+
+
+@router.patch("/marks/{mark_id}", response_model=MarkResponse)
+def update_mark(
+    mark_id: str,
+    mark_in: MarkUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Update a mark. Student can only edit their own marks if status is draft or pending_verification.
+    Status cannot be set to 'verified' directly by the student.
+    """
+    mark = db.query(Mark).filter(Mark.id == mark_id).first()
+    if not mark:
+        raise HTTPException(status_code=404, detail="Mark not found.")
+    if mark.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to edit this mark.")
+    if mark.status in ("verified", "locked"):
+        raise HTTPException(status_code=403, detail="Cannot edit a verified or locked mark.")
+    # Block direct status promotion to verified or locked
+    if mark_in.status in ("verified", "locked"):
+        raise HTTPException(status_code=403, detail="Cannot set mark status to verified or locked directly.")
+
+    # Apply updates
+    update_data = mark_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(mark, field, value)
+
+    # Recompute letter grade if score changed
+    if "score" in update_data:
+        scale_rows = db.query(GradingScaleRow).filter(GradingScaleRow.user_id == current_user.id).all()
+        letter_grade = None
+        for row in scale_rows:
+            if mark.score >= row.min_percent and (row.max_percent is None or mark.score <= row.max_percent):
+                letter_grade = row.letter_grade
+                break
+        if letter_grade:
+            mark.letter_grade = letter_grade
+
+    db.commit()
+    db.refresh(mark)
+    return mark
+
+
+@router.delete("/marks/{mark_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_mark(
+    mark_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Delete a mark. Student can only delete their own draft or pending_verification marks.
+    """
+    mark = db.query(Mark).filter(Mark.id == mark_id).first()
+    if not mark:
+        raise HTTPException(status_code=404, detail="Mark not found.")
+    if mark.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this mark.")
+    if mark.status not in ("draft", "pending_verification"):
+        raise HTTPException(status_code=403, detail="Cannot delete a verified or locked mark.")
+
+    db.delete(mark)
+    db.commit()
+    return None
 
 
 # --- OCR ENDPOINTS ---
@@ -324,6 +504,16 @@ def ocr_extract(
             detail="Rate limit exceeded. Max 10 OCR calls per hour."
         )
 
+    # Validate size first (before reading into memory)
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+    if file_size > 5242880:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size exceeds the 5MB limit."
+        )
+
     # Validate image MIME
     valid_mimes = ["image/png", "image/jpeg", "image/webp", "image/jpg"]
     if file.content_type not in valid_mimes:
@@ -334,14 +524,6 @@ def ocr_extract(
 
     try:
         image_bytes = file.file.read()
-        
-        # Validate size: 5MB limit
-        if len(image_bytes) > 5242880:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="File size exceeds the 5MB limit."
-            )
-            
         res = perform_ocr(image_bytes)
         return res
     except ValueError as ve:
@@ -372,11 +554,34 @@ def upload_and_parse_transcript(
     # Semester Guard check
     SemesterGuard.check_transcript_upload(current_user.current_semester)
 
+    # Validate size first (before reading into memory)
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+    if file_size > 10485760:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size exceeds the 10MB limit."
+        )
+
+    # Validate PDF MIME
     if file.content_type != "application/pdf":
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="File must be a PDF."
         )
+
+    # Duplicate check for the same semester
+    if semester:
+        existing = db.query(Transcript).filter(
+            Transcript.student_id == current_user.id,
+            Transcript.semester == semester
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Transcript for this semester already uploaded."
+            )
 
     # Create pending transcript record
     transcript = Transcript(
@@ -392,13 +597,6 @@ def upload_and_parse_transcript(
 
     try:
         file_bytes = file.file.read()
-        
-        # Validate size: 10MB limit
-        if len(file_bytes) > 10485760:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="File size exceeds the 10MB limit."
-            )
 
         parsed_semesters = parse_transcript_pdf(file_bytes)
         if not parsed_semesters:
@@ -474,12 +672,16 @@ def upload_and_parse_transcript(
         transcript.verified_at = datetime.utcnow()
         db.commit()
 
-        # Run overall GPA trigger recalculation
-        return {
+        # Store diff in memory for get_transcript_diff
+        diff_data = {
             "verified_count": verified_count,
             "new_count": new_count,
             "unmatched": unmatched_courses
         }
+        TRANSCRIPT_DIFFS[transcript.id] = diff_data
+
+        # Run overall GPA trigger recalculation
+        return diff_data
 
     except Exception as e:
         db.rollback()
@@ -491,17 +693,103 @@ def upload_and_parse_transcript(
         )
 
 
+@router.get("/transcripts/{transcript_id}", response_model=TranscriptResponse)
+def get_transcript(
+    transcript_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get a single transcript by ID. Student can only access their own.
+    """
+    transcript = db.query(Transcript).filter(Transcript.id == transcript_id).first()
+    if not transcript:
+        raise HTTPException(status_code=404, detail="Transcript not found.")
+    if transcript.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this transcript.")
+    return transcript
+
+
+@router.get("/transcripts/{transcript_id}/diff", response_model=ReconciliationResponse)
+def get_transcript_diff(
+    transcript_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get the reconciliation diff for a parsed transcript.
+    """
+    transcript = db.query(Transcript).filter(Transcript.id == transcript_id).first()
+    if not transcript:
+        raise HTTPException(status_code=404, detail="Transcript not found.")
+    if transcript.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this transcript.")
+    
+    diff = TRANSCRIPT_DIFFS.get(transcript_id)
+    if not diff:
+        diff = {
+            "verified_count": 0,
+            "new_count": 0,
+            "unmatched": []
+        }
+    return diff
+
+
 @router.get("/transcripts", response_model=List[TranscriptResponse])
 def get_transcripts(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    List transcript upload history with status tags. Role-aware.
+    List transcript upload history with status tags. Student sees only their own.
     """
-    if current_user.role in ["teacher", "admin"]:
-        return db.query(Transcript).all()
     return db.query(Transcript).filter(Transcript.student_id == current_user.id).all()
+
+
+# --- GPA HISTORY ENDPOINT ---
+
+@router.get("/gpa_history", response_model=List[GpaHistoryResponse])
+def get_gpa_history(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Return all GPA history entries for the current student (for trend chart).
+    """
+    results = (
+        db.query(GpaHistory)
+        .filter(GpaHistory.student_id == current_user.id)
+        .all()
+    )
+    import re
+    if results:
+        results.sort(key=lambda x: int(re.search(r'\d+', x.semester).group()) if re.search(r'\d+', x.semester) else 0)
+        return results
+
+    # Fallback: dynamically calculate trend (especially on SQLite where Postgres triggers don't run)
+    all_marks = db.query(Mark).filter(Mark.student_id == current_user.id).all()
+    scale_rows = db.query(GradingScaleRow).filter(GradingScaleRow.user_id == current_user.id).all()
+    
+    verified_marks = [m for m in all_marks if m.status.lower() == "verified"]
+    if not verified_marks:
+        return []
+        
+    semesters = list({m.semester for m in verified_marks})
+    semesters.sort(key=lambda s: int(re.search(r'\d+', s).group()) if re.search(r'\d+', s) else 0)
+    
+    history = []
+    accumulated_marks = []
+    for sem in semesters:
+        sem_marks = [m for m in verified_marks if m.semester == sem]
+        gpa = calculate_gpa(sem_marks, scale_rows)
+        accumulated_marks.extend(sem_marks)
+        cgpa_at_time = calculate_cgpa(accumulated_marks, scale_rows)
+        history.append({
+            "semester": sem,
+            "gpa": gpa,
+            "cgpa_at_time": cgpa_at_time
+        })
+    return history
 
 
 # --- GPA & CGPA ENDPOINTS ---

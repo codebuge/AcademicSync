@@ -103,3 +103,78 @@ def get_cgpa_projection(
         "required_gpa": required_gpa,
         "achievable": achievable
     }
+
+def score_to_letter_grade_default(score: float) -> str:
+    if score >= 93: return "A"
+    elif score >= 90: return "A-"
+    elif score >= 87: return "B+"
+    elif score >= 83: return "B"
+    elif score >= 80: return "B-"
+    elif score >= 77: return "C+"
+    elif score >= 73: return "C"
+    elif score >= 70: return "C-"
+    elif score >= 60: return "D"
+    else: return "F"
+
+def calculate_gpa_from_courses(courses: List[Any], grading_scale: str = "4.0") -> float:
+    eligible_courses = []
+    for c in courses:
+        score = getattr(c, "score", None)
+        if score is None:
+            score = c.get("score", 0.0)
+        credits = getattr(c, "credit_hours", None)
+        if credits is None:
+            credits = c.get("credit_hours", 0.0)
+
+        if grading_scale == "4.0":
+            gp = score_to_gpa(score, [])
+        elif grading_scale == "5.0":
+            gp_4_0 = score_to_gpa(score, [])
+            gp = round(gp_4_0 * 1.25, 2) if gp_4_0 is not None else 0.0
+        elif grading_scale == "percentage":
+            gp = score
+        else:
+            gp = score_to_gpa(score, [])
+
+        if gp is not None:
+            eligible_courses.append((gp, credits))
+
+    if not eligible_courses:
+        return 0.0
+
+    total_points = sum(gp * credits for gp, credits in eligible_courses)
+    total_credits = sum(credits for gp, credits in eligible_courses)
+
+    if total_credits == 0:
+        return 0.0
+
+    return round(total_points / total_credits, 2)
+
+def get_course_breakdown(courses: List[Any], grading_scale: str = "4.0") -> List[dict]:
+    breakdown = []
+    for c in courses:
+        score = getattr(c, "score", None)
+        if score is None:
+            score = c.get("score", 0.0)
+        name = getattr(c, "course_name", None)
+        if name is None:
+            name = c.get("course_name", "")
+            
+        letter_grade = score_to_letter_grade_default(score)
+        
+        if grading_scale == "4.0":
+            gp = score_to_gpa(score, [])
+        elif grading_scale == "5.0":
+            gp_4_0 = score_to_gpa(score, [])
+            gp = round(gp_4_0 * 1.25, 2) if gp_4_0 is not None else 0.0
+        elif grading_scale == "percentage":
+            gp = score
+        else:
+            gp = score_to_gpa(score, [])
+            
+        breakdown.append({
+            "course_name": name,
+            "letter_grade": letter_grade,
+            "grade_points": gp
+        })
+    return breakdown

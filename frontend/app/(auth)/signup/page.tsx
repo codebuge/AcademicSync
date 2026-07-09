@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { UserPlus, Loader2, TriangleAlert, XCircle, Upload, Image as ImageIcon } from 'lucide-react'
+import { UserPlus, Loader2, TriangleAlert, XCircle, Upload, Image as ImageIcon, Sparkles, X } from 'lucide-react'
 
 const signupSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -27,6 +27,22 @@ export default function SignupPage() {
   const [preview, setPreview] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [hasDraft, setHasDraft] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const draft = sessionStorage.getItem('try_gpa_draft')
+      if (draft) {
+        setHasDraft(true)
+      }
+    }
+  }, [])
+
+  const handleDismissDraft = () => {
+    sessionStorage.removeItem('try_gpa_draft')
+    setHasDraft(false)
+  }
+
 
   const {
     register,
@@ -82,6 +98,19 @@ export default function SignupPage() {
     <>
       <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Create account</h2>
       <p className="text-sm mb-5" style={{ color: 'var(--muted-foreground)' }}>Start tracking your academic performance</p>
+
+      {hasDraft && (
+        <div className="mb-4 p-3 rounded-lg text-sm flex justify-between items-start gap-2.5 animate-slide-down"
+          style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)', color: 'hsl(38,92%,70%)' }}>
+          <div className="flex gap-2 items-start">
+            <Sparkles size={16} className="shrink-0 mt-0.5" style={{ color: 'hsl(38,92%,55%)' }} />
+            <span>We saved your GPA calculation — sign up to keep it.</span>
+          </div>
+          <button type="button" onClick={handleDismissDraft} className="p-0.5 hover:opacity-75 transition-opacity shrink-0">
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {authError && (
         <div className="mb-4 p-3 rounded-lg text-sm animate-slide-down"

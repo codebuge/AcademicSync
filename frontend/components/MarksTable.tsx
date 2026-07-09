@@ -60,49 +60,85 @@ export function MarksTable({ marks }: MarksTableProps) {
   )
 
   return (
-    <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid var(--border)' }}>
-      <table className="w-full text-sm">
-        <thead style={{ background: 'var(--muted)', borderBottom: '1px solid var(--border)' }}>
-          <tr>
-            <HeaderCell label="Course" sortField="course_name" />
-            <HeaderCell label="Semester" sortField="semester" />
-            <HeaderCell label="Score %" sortField="score" />
-            <HeaderCell label="Credits" sortField="credit_hours" />
-            <th className="text-left py-2.5 px-3 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Grade</th>
-            <HeaderCell label="Status" sortField="status" />
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((mark, i) => {
-            const status = statusConfig[mark.status] || statusConfig.draft
-            const scoreColor = mark.score >= 80 ? '#2dd4bf' : mark.score >= 60 ? '#fbbf24' : '#f87171'
-            return (
-              <tr key={mark.id}
-                className="transition-colors hover:bg-white/[0.02]"
-                style={{ borderBottom: i < sorted.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <td className="py-3 px-3">
-                  <p className="font-medium truncate max-w-[180px]" style={{ color: 'var(--foreground)' }}>{mark.course_name}</p>
-                  <p className="text-xs capitalize" style={{ color: 'var(--muted-foreground)' }}>{mark.source}</p>
-                </td>
-                <td className="py-3 px-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.semester}</td>
-                <td className="py-3 px-3">
-                  <span className="font-semibold tabular-nums" style={{ color: scoreColor }}>{mark.score}%</span>
-                </td>
-                <td className="py-3 px-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.credit_hours} cr</td>
-                <td className="py-3 px-3">
-                  <span className="font-medium text-xs" style={{ color: 'var(--foreground)' }}>{mark.letter_grade || '—'}</span>
-                </td>
-                <td className="py-3 px-3">
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: status.bg, color: status.color }}>
-                    {status.label}
-                  </span>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
+    <>
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto rounded-xl" style={{ border: '1px solid var(--border)' }}>
+        <table className="w-full text-sm">
+          <thead style={{ background: 'var(--muted)', borderBottom: '1px solid var(--border)' }}>
+            <tr>
+              <HeaderCell label="Course" sortField="course_name" />
+              <HeaderCell label="Semester" sortField="semester" />
+              <HeaderCell label="Score %" sortField="score" />
+              <HeaderCell label="Credits" sortField="credit_hours" />
+              <th className="text-left py-2.5 px-3 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Grade</th>
+              <HeaderCell label="Status" sortField="status" />
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((mark, i) => {
+              const status = statusConfig[mark.status] || statusConfig.draft
+              const scoreColor = mark.score >= 80 ? '#2dd4bf' : mark.score >= 60 ? '#fbbf24' : '#f87171'
+              return (
+                <tr key={mark.id}
+                  className="transition-colors hover:bg-white/[0.02]"
+                  style={{ borderBottom: i < sorted.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                  <td className="py-3 px-3">
+                    <p className="font-medium truncate max-w-[180px]" style={{ color: 'var(--foreground)' }}>{mark.course_name}</p>
+                    <p className="text-xs capitalize" style={{ color: 'var(--muted-foreground)' }}>{mark.source}</p>
+                  </td>
+                  <td className="py-3 px-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.semester}</td>
+                  <td className="py-3 px-3">
+                    <span className="font-semibold tabular-nums" style={{ color: scoreColor }}>{mark.score}%</span>
+                  </td>
+                  <td className="py-3 px-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.credit_hours} cr</td>
+                  <td className="py-3 px-3">
+                    <span className="font-medium text-xs" style={{ color: 'var(--foreground)' }}>{mark.letter_grade || '—'}</span>
+                  </td>
+                  <td className="py-3 px-3">
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                      style={{ background: status.bg, color: status.color }}>
+                      {status.label}
+                    </span>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="block md:hidden space-y-3">
+        {sorted.map((mark) => {
+          const status = statusConfig[mark.status] || statusConfig.draft
+          const scoreColor = mark.score >= 80 ? '#2dd4bf' : mark.score >= 60 ? '#fbbf24' : '#f87171'
+          return (
+            <div key={mark.id} className="glass rounded-xl p-4 border" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex justify-between items-start gap-2">
+                <div>
+                  <p className="font-semibold text-sm text-white truncate max-w-[180px]">{mark.course_name}</p>
+                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.semester} · {mark.credit_hours} cr</p>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0"
+                  style={{ background: status.bg, color: status.color }}>
+                  {status.label}
+                </span>
+              </div>
+              <div className="flex justify-between items-center mt-3 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+                <span className="text-[11px] capitalize" style={{ color: 'var(--muted-foreground)' }}>Source: {mark.source}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>Score:</span>
+                  <span className="font-bold text-sm" style={{ color: scoreColor }}>{mark.score}%</span>
+                  {mark.letter_grade && (
+                    <span className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] text-white font-semibold">{mark.letter_grade}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </>
   )
 }
+

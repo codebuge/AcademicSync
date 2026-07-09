@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AcademicSync | Performance Analysis</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#a83820",
+                    "outline": "#6f7a74",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#e2e3e1",
+                    "on-tertiary-container": "#d7dee0",
+                    "on-primary-fixed": "#002117",
+                    "surface-container-low": "#f4f4f2",
+                    "secondary-fixed-dim": "#ffb4a4",
+                    "on-primary-fixed-variant": "#00513e",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#84d6b9",
+                    "outline-variant": "#bec9c3",
+                    "on-secondary-fixed-variant": "#87200a",
+                    "tertiary-fixed-dim": "#c1c8ca",
+                    "primary-fixed": "#a0f3d4",
+                    "on-primary": "#ffffff",
+                    "surface": "#f9f9f7",
+                    "on-surface": "#1a1c1b",
+                    "on-secondary-fixed": "#3e0500",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#2f3130",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#086b53",
+                    "surface-dim": "#dadad8",
+                    "background": "#f9f9f7",
+                    "surface-container-high": "#e8e8e6",
+                    "surface-container": "#eeeeec",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#dde4e6",
+                    "inverse-on-surface": "#f1f1ef",
+                    "secondary-fixed": "#ffdad3",
+                    "on-tertiary-fixed-variant": "#41484a",
+                    "surface-variant": "#e2e3e1",
+                    "on-secondary-container": "#6c1000",
+                    "tertiary": "#434a4c",
+                    "surface-bright": "#f9f9f7",
+                    "primary": "#005440",
+                    "secondary-container": "#fc7558",
+                    "primary-container": "#0f6e56",
+                    "on-tertiary-fixed": "#161d1f",
+                    "primary-fixed-dim": "#84d6b9",
+                    "tertiary-container": "#5b6264",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#1a1c1b",
+                    "on-primary-container": "#9aedcf",
+                    "on-surface-variant": "#3f4944"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-xs": "4px",
+                    "stack-sm": "12px",
+                    "stack-md": "24px",
+                    "margin-desktop": "48px",
+                    "container-max": "1440px",
+                    "margin-mobile": "16px",
+                    "stack-lg": "48px",
+                    "base": "8px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-md": ["Hanken Grotesk"],
+                    "label-md": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "label-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #f9f9f7; font-family: 'Hanken Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .elevation-1 { shadow: 0px 4px 20px rgba(0,0,0,0.04); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bec9c3; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-40 bg-surface/80 backdrop-blur-md flex justify-between items-center px-margin-mobile lg:px-margin-desktop h-16 border-b border-outline-variant/30">
+<div class="flex items-center gap-4">
+<img alt="AcademicSync Logo" class="h-8 lg:hidden" src="https://lh3.googleusercontent.com/aida/AP1WRLtkAUnJdGugk0EUVEDQlBA2aWbhdJgRqp0p2y6TNq3By9lrtO5CT-6FDzJhsrcVJ3dqzeTVg6tC0gwurIucQtL4-y0qhYahn37GC5ilPMV0HIqUwk_I96DUD03FU6OQfLjQewCGTwCYv7QCrGn5qYR7MjIlEnAhyl7yJmuFuNtIAQwS441ImEQiCQIMc3etHhvkaxUHWne18X-iM1L6XGgkCR67pzmlSe3aVusUuMaOnyZo-LSqeUR9UNo"/>
+<div class="hidden lg:flex items-center gap-3">
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                    Semester 5
+                </span>
+<span class="px-3 py-1 bg-primary/10 rounded-full font-label-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+                    CGPA: 3.65
+                </span>
+</div>
+</div>
+<div class="flex items-center gap-base">
+<button class="p-2 hover:bg-surface-variant/50 rounded-full transition-all duration-300">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold font-label-md cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all" id="profile-trigger">
+                JD
+            </div>
+</div>
+</header>
+<!-- Slide-in Overlay Menu (Mobile Settings/Profile) -->
+<div class="fixed inset-0 z-50 invisible transition-all duration-300" id="overlay-menu">
+<div class="absolute inset-0 bg-black/20 backdrop-blur-sm opacity-0 transition-opacity duration-300" id="overlay-backdrop"></div>
+<div class="absolute right-0 top-0 h-full w-[280px] bg-surface-container-lowest translate-x-full transition-transform duration-300 shadow-xl p-stack-md" id="overlay-content">
+<div class="flex justify-between items-center mb-stack-lg">
+<h3 class="font-headline-md text-headline-md">Account</h3>
+<button class="material-symbols-outlined p-2 hover:bg-surface-variant rounded-full" id="close-overlay">close</button>
+</div>
+<div class="space-y-2">
+<a class="flex items-center gap-4 p-4 hover:bg-surface-container-high rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-body-md">My Profile</span>
+</a>
+<a class="flex items-center gap-4 p-4 hover:bg-surface-container-high rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+<hr class="my-4 border-outline-variant"/>
+<a class="flex items-center gap-4 p-4 text-error hover:bg-error-container/20 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md font-bold">Sign Out</span>
+</a>
+</div>
+</div>
+</div>
+<!-- SideNavBar (Desktop) -->
+<nav class="fixed left-0 top-0 h-full w-[280px] hidden lg:flex flex-col bg-surface-container-low py-stack-lg px-base border-r border-outline-variant/30 z-50">
+<div class="mb-stack-lg px-3">
+<div class="flex items-center gap-3 mb-1">
+<img alt="AcademicSync Logo" class="h-8" src="https://lh3.googleusercontent.com/aida/AP1WRLtkAUnJdGugk0EUVEDQlBA2aWbhdJgRqp0p2y6TNq3By9lrtO5CT-6FDzJhsrcVJ3dqzeTVg6tC0gwurIucQtL4-y0qhYahn37GC5ilPMV0HIqUwk_I96DUD03FU6OQfLjQewCGTwCYv7QCrGn5qYR7MjIlEnAhyl7yJmuFuNtIAQwS441ImEQiCQIMc3etHhvkaxUHWne18X-iM1L6XGgkCR67pzmlSe3aVusUuMaOnyZo-LSqeUR9UNo"/>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">AcademicSync</h1>
+</div>
+<p class="font-label-sm text-on-surface-variant">Academic Excellence System</p>
+</div>
+<ul class="flex-1 space-y-2">
+<li>
+<a class="flex items-center gap-4 p-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">grade</span>
+<span class="font-body-md">Marks</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-body-md">Transcript</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 p-3 bg-primary-fixed/30 text-primary font-bold rounded-lg active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md">Analysis</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto pt-stack-md space-y-2 border-t border-outline-variant/30">
+<a class="flex items-center gap-4 p-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-4 p-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-body-md">Profile</span>
+</a>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="pt-24 pb-24 lg:pt-24 lg:pb-8 lg:pl-[300px] px-margin-mobile lg:pr-margin-desktop min-h-screen">
+<header class="mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Performance Analysis</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Deep insights into your academic journey and future trajectory.</p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- CGPA Trend Chart -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl p-stack-md shadow-sm border border-outline-variant/20 h-[400px] flex flex-col transition-all hover:shadow-md">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-stack-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">CGPA Trend</h3>
+<div class="flex flex-wrap items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 bg-primary-fixed-dim rounded-full"></span>
+<span class="font-label-md text-on-surface-variant text-[13px]">Your CGPA</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="border-b-2 border-dashed border-secondary w-6"></span>
+<span class="font-label-md text-on-surface-variant text-[13px]">Dean's List (3.5)</span>
+</div>
+</div>
+</div>
+<div class="flex-1 relative mt-4">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 800 250">
+<line stroke="#eeeeec" stroke-width="1" x1="0" x2="800" y1="50" y2="50"></line>
+<line stroke="#eeeeec" stroke-width="1" x1="0" x2="800" y1="100" y2="100"></line>
+<line stroke="#eeeeec" stroke-width="1" x1="0" x2="800" y1="150" y2="150"></line>
+<line stroke="#eeeeec" stroke-width="1" x1="0" x2="800" y1="200" y2="200"></line>
+<line stroke="#a83820" stroke-dasharray="6,4" stroke-width="2" x1="0" x2="800" y1="75" y2="75"></line>
+<path d="M0,200 L100,180 L200,160 L300,120 L400,100 L500,85 L600,70 L700,60 L800,55 L800,250 L0,250 Z" fill="#84d6b9" fill-opacity="0.15"></path>
+<path d="M0,200 L100,180 L200,160 L300,120 L400,100 L500,85 L600,70 L700,60 L800,55" fill="none" stroke="#005440" stroke-linecap="round" stroke-width="3"></path>
+<circle cx="0" cy="200" fill="#005440" r="4"></circle>
+<circle cx="400" cy="100" fill="#005440" r="4"></circle>
+<circle cx="800" cy="55" fill="#005440" r="4"></circle>
+</svg>
+<div class="flex justify-between mt-4 font-label-sm text-on-surface-variant overflow-x-auto whitespace-nowrap">
+<span>Sem 1</span><span>Sem 2</span><span>Sem 3</span><span>Sem 4</span><span>Sem 5</span><span>Sem 6</span><span>Sem 7</span><span>Sem 8</span><span>Final</span>
+</div>
+</div>
+</div>
+<!-- Projection Widget -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl p-stack-md shadow-sm border border-outline-variant/20 flex flex-col justify-between transition-all hover:shadow-md">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Projection Tool</h3>
+<p class="font-body-md text-on-surface-variant mb-6">Calculate effort needed to reach your academic goals.</p>
+<div class="space-y-4">
+<div>
+<label class="block font-label-md text-on-surface-variant mb-2">Target CGPA</label>
+<input class="w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary rounded-lg p-3 text-body-md" placeholder="3.8" step="0.1" type="number" value="3.8"/>
+</div>
+<div>
+<label class="block font-label-md text-on-surface-variant mb-2">Remaining Semesters</label>
+<input class="w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary rounded-lg p-3 text-body-md" placeholder="3" type="number" value="3"/>
+</div>
+</div>
+</div>
+<div class="mt-8">
+<button class="w-full bg-primary text-on-primary font-label-md py-3.5 rounded-lg hover:shadow-lg active:scale-[0.98] transition-all">
+                        Calculate Target
+                    </button>
+<div class="mt-4 p-4 bg-primary/5 rounded-lg border-l-4 border-primary">
+<p class="font-body-md text-primary-fixed-dim text-on-primary-container">You need a <span class="font-bold">3.6 GPA</span> in your remaining semesters.</p>
+</div>
+</div>
+</div>
+<!-- Top Courses Bar Chart -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl p-stack-md shadow-sm border border-outline-variant/20 transition-all hover:shadow-md">
+<h3 class="font-label-md text-on-surface-variant uppercase tracking-wider mb-stack-md">Top 5 Courses</h3>
+<div class="space-y-5">
+<div class="space-y-2">
+<div class="flex justify-between font-label-md">
+<span class="text-on-surface">Data Structures</span>
+<span class="font-bold text-primary">A (4.0)</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[100%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-label-md">
+<span class="text-on-surface">Database Systems</span>
+<span class="font-bold text-primary">A- (3.7)</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[92%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-label-md">
+<span class="text-on-surface">Operating Systems</span>
+<span class="font-bold text-primary">B+ (3.3)</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[82%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Courses to Review -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl p-stack-md shadow-sm border border-outline-variant/20 transition-all hover:shadow-md flex flex-col">
+<h3 class="font-label-md text-on-surface-variant uppercase tracking-wider mb-stack-md">Courses to Review</h3>
+<div class="space-y-5 flex-1">
+<div class="space-y-2">
+<div class="flex justify-between font-label-md">
+<span class="text-on-surface">Calculus III</span>
+<span class="font-bold text-secondary">C (2.0)</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[50%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-label-md">
+<span class="text-on-surface">Discrete Math</span>
+<span class="font-bold text-secondary">B- (2.7)</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[68%] rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="mt-6 flex items-start gap-3 p-3 bg-error-container/30 rounded-lg">
+<span class="material-symbols-outlined text-error text-[20px]">warning</span>
+<p class="font-label-sm text-on-error-container">2 courses need attention to meet your 3.5 target.</p>
+</div>
+</div>
+<!-- Credit Distribution Donut Chart -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl p-stack-md shadow-sm border border-outline-variant/20 transition-all hover:shadow-md flex flex-col items-center">
+<h3 class="font-headline-md text-headline-md text-on-surface self-start mb-6">Credit Hours</h3>
+<div class="relative w-40 h-40">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="transparent" r="42" stroke="#eeeeec" stroke-width="10"></circle>
+<circle cx="50" cy="50" fill="transparent" r="42" stroke="#005440" stroke-dasharray="158 263" stroke-width="10"></circle>
+<circle cx="50" cy="50" fill="transparent" r="42" stroke="#0f6e56" stroke-dasharray="66 263" stroke-dashoffset="-158" stroke-width="10"></circle>
+<circle cx="50" cy="50" fill="transparent" r="42" stroke="#84d6b9" stroke-dasharray="39 263" stroke-dashoffset="-224" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-md text-on-surface">120</span>
+<span class="font-label-sm text-on-surface-variant uppercase">Total</span>
+</div>
+</div>
+<div class="w-full mt-8 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-primary rounded-full"></span>
+<span class="font-label-md text-on-surface">Core</span>
+</div>
+<span class="font-label-md font-bold">72</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-primary-container rounded-full"></span>
+<span class="font-label-md text-on-surface">Electives</span>
+</div>
+<span class="font-label-md font-bold">30</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 bg-surface flex justify-around items-center px-2 py-3 border-t border-outline-variant/30 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant transition-all active:scale-90 flex-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-[10px]">Dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant transition-all active:scale-90 flex-1" href="#">
+<span class="material-symbols-outlined">grade</span>
+<span class="font-label-sm text-[10px]">Marks</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant transition-all active:scale-90 flex-1" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-sm text-[10px]">Transcript</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary transition-all active:scale-90 flex-1" href="#">
+<div class="bg-primary/10 px-4 py-1 rounded-full flex flex-col items-center">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-[10px] font-bold">Analysis</span>
+</div>
+</a>
+</nav>
+<!-- Simple Interactivity -->
+<script>
+        const profileTrigger = document.getElementById('profile-trigger');
+        const overlayMenu = document.getElementById('overlay-menu');
+        const overlayBackdrop = document.getElementById('overlay-backdrop');
+        const overlayContent = document.getElementById('overlay-content');
+        const closeOverlay = document.getElementById('close-overlay');
+
+        function toggleOverlay(show) {
+            if (show) {
+                overlayMenu.classList.remove('invisible');
+                setTimeout(() => {
+                    overlayBackdrop.classList.add('opacity-100');
+                    overlayContent.classList.remove('translate-x-full');
+                }, 10);
+            } else {
+                overlayBackdrop.classList.remove('opacity-100');
+                overlayContent.classList.add('translate-x-full');
+                setTimeout(() => {
+                    overlayMenu.classList.add('invisible');
+                }, 300);
+            }
+        }
+
+        profileTrigger.addEventListener('click', () => toggleOverlay(true));
+        closeOverlay.addEventListener('click', () => toggleOverlay(false));
+        overlayBackdrop.addEventListener('click', () => toggleOverlay(false));
+
+        // Forms enhancement
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.classList.add('ring-2', 'ring-primary/20');
+            });
+            input.addEventListener('blur', () => {
+                input.classList.remove('ring-2', 'ring-primary/20');
+            });
+        });
+    </script>
+</body></html>

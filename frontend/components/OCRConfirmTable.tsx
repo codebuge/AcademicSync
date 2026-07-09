@@ -54,7 +54,8 @@ export function OCRConfirmTable({ results, onConfirm, onCancel }: OCRConfirmTabl
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid var(--border)' }}>
+      {/* Desktop View */}
+      <div className="hidden md:block overflow-x-auto rounded-xl" style={{ border: '1px solid var(--border)' }}>
         <table className="w-full text-sm">
           <thead style={{ background: 'var(--muted)', borderBottom: '1px solid var(--border)' }}>
             <tr>
@@ -137,6 +138,87 @@ export function OCRConfirmTable({ results, onConfirm, onCancel }: OCRConfirmTabl
           </tbody>
         </table>
       </div>
+
+      {/* Mobile Card View */}
+      <div className="block md:hidden space-y-3">
+        {editedMarks.map((mark, i) => {
+          const isLow = mark.flagged || mark.confidence < 0.85
+          return (
+            <div key={i} className="glass rounded-xl p-4 border transition-all"
+              style={{
+                borderColor: isLow ? 'rgba(245,158,11,0.3)' : 'var(--border)',
+                background: isLow ? 'rgba(245,158,11,0.06)' : 'transparent',
+              }}>
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  {isLow ? (
+                    <div className="space-y-1">
+                      <label className="block text-[10px] uppercase font-bold" style={{ color: 'var(--muted-foreground)' }}>Course Name</label>
+                      <input
+                        value={mark.course_name}
+                        onChange={e => updateMark(i, 'course_name', e.target.value)}
+                        className="w-full px-2 py-1 rounded-lg text-xs"
+                        style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', color: 'var(--foreground)', outline: 'none' }}
+                      />
+                    </div>
+                  ) : (
+                    <p className="font-semibold text-sm text-white truncate">{mark.course_name}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2.5 shrink-0 pt-1">
+                  <input
+                    type="checkbox"
+                    checked={confirmed.has(i)}
+                    onChange={() => toggleConfirm(i)}
+                    className="w-4 h-4 rounded cursor-pointer accent-teal-400"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+                <div className="space-y-1">
+                  <span className="block text-[10px] uppercase font-semibold" style={{ color: 'var(--muted-foreground)' }}>Credits</span>
+                  {isLow ? (
+                    <input type="number" min="0.5" max="4" step="0.5"
+                      value={mark.credit_hours}
+                      onChange={e => updateMark(i, 'credit_hours', parseFloat(e.target.value))}
+                      className="w-full px-2 py-1 rounded-lg text-xs"
+                      style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', color: 'var(--foreground)', outline: 'none' }}
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold text-white">{mark.credit_hours} cr</span>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <span className="block text-[10px] uppercase font-semibold" style={{ color: 'var(--muted-foreground)' }}>Score %</span>
+                  {isLow ? (
+                    <input type="number" min="0" max="100" step="0.1"
+                      value={mark.score}
+                      onChange={e => updateMark(i, 'score', parseFloat(e.target.value))}
+                      className="w-full px-2 py-1 rounded-lg text-xs"
+                      style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', color: 'var(--foreground)', outline: 'none' }}
+                    />
+                  ) : (
+                    <span className="text-xs font-bold text-teal-400">{mark.score}%</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 mt-3 text-xs">
+                {isLow
+                  ? <AlertTriangle size={12} style={{ color: '#fbbf24' }} />
+                  : <CheckCircle size={12} style={{ color: '#2dd4bf' }} />
+                }
+                <span className="font-semibold" style={{ color: isLow ? '#fbbf24' : '#2dd4bf' }}>
+                  {(mark.confidence * 100).toFixed(0)}% confidence
+                </span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
 
       <div className="flex items-center justify-between pt-1">
         <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>

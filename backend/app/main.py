@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.db.session import engine
 from app.db.models import Base
 from app.api.endpoints import router as api_router
+from app.services.semester_guard import SemesterGuardBlocked
 
 # Initialize Database tables
 try:
@@ -18,6 +20,14 @@ app = FastAPI(
     version="1.0.0",
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+@app.exception_handler(SemesterGuardBlocked)
+async def semester_guard_blocked_handler(request, exc: SemesterGuardBlocked):
+    return JSONResponse(
+        status_code=403,
+        content={"detail": exc.detail, "code": exc.code}
+    )
+
 
 # CORS configuration: parse ALLOWED_ORIGINS env variable (comma-separated, no wildcards)
 origins = [origin.strip() for origin in settings.ALLOWED_ORIGINS.split(",") if origin.strip()]

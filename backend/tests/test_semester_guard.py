@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 from app.db.session import Base
 from app.db.models import User, Mark
-from app.services.semester_guard import SemesterGuard
+from app.services.semester_guard import SemesterGuard, SemesterGuardBlocked
 
 @pytest.fixture(scope="module")
 def db():
@@ -68,11 +68,10 @@ class TestValidateTransition:
 class TestSemesterGuardUploadChecks:
     def test_semester_1_upload_blocked(self, db):
         user = make_test_user(db, "student-sem1", sem=1)
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(SemesterGuardBlocked) as exc_info:
             SemesterGuard.check_transcript_upload(user.current_semester)
         
-        assert exc_info.value.status_code == 403
-        assert exc_info.value.detail["code"] == "SEMESTER_GUARD_BLOCKED"
+        assert "available from Semester 2 onwards" in str(exc_info.value)
 
     def test_semester_2_upload_allowed(self, db):
         user = make_test_user(db, "student-sem2", sem=2)

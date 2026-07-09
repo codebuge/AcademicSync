@@ -20,6 +20,9 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True
 
+class SemesterUpdate(BaseModel):
+    current_semester: Optional[int] = Field(None, ge=1, le=12)
+
 
 # --- Mark Schemas ---
 class MarkBase(BaseModel):
@@ -32,6 +35,15 @@ class MarkBase(BaseModel):
 
 class MarkCreate(MarkBase):
     student_id: Optional[str] = None
+
+class MarkUpdate(BaseModel):
+    course_name: Optional[str] = None
+    score: Optional[float] = Field(None, ge=0, le=100)
+    max_score: Optional[float] = Field(None, gt=0)
+    semester: Optional[str] = None
+    credit_hours: Optional[float] = Field(None, gt=0, le=19)
+    letter_grade: Optional[str] = None
+    status: Optional[str] = None
 
 class MarkResponse(MarkBase):
     id: str
@@ -102,6 +114,27 @@ class OcrGradingScaleResponse(BaseModel):
     error_code: Optional[str] = None
 
 
+# --- Public Calculator Schemas ---
+class CourseInput(BaseModel):
+    course_name: str
+    credit_hours: float = Field(..., ge=0.5, le=6.0)
+    score: float = Field(..., ge=0.0, le=100.0)
+
+class PublicGpaRequest(BaseModel):
+    courses: List[CourseInput]
+    grading_scale: str = "4.0" # "4.0" | "5.0" | "percentage"
+
+class CourseBreakdown(BaseModel):
+    course_name: str
+    letter_grade: str
+    grade_points: float
+
+class PublicGpaResponse(BaseModel):
+    gpa: float
+    total_credit_hours: float
+    course_breakdown: List[CourseBreakdown]
+
+
 # --- Calculation Schemas ---
 class GpaResponse(BaseModel):
     semester: str
@@ -112,6 +145,18 @@ class CgpaResponse(BaseModel):
     cgpa: float
     total_verified_credits: float
     verified_semesters_count: int
+
+class GpaHistoryResponse(BaseModel):
+    id: str
+    student_id: str
+    semester: str
+    gpa: float
+    cgpa_at_time: Optional[float] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 # --- Projection & Analysis Schemas ---
@@ -139,4 +184,5 @@ class PerformanceAnalysisResponse(BaseModel):
     total_courses_count: int
     verification_summary: dict
     projection: Optional[ProjectionResponse] = None
+
 

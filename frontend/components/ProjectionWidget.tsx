@@ -35,7 +35,8 @@ export function ProjectionWidget({ currentCgpa, onCalculate, result, isLoading }
         Current CGPA: <strong className="text-teal-400">{currentCgpa.toFixed(2)}</strong>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>Target CGPA</label>
           <input

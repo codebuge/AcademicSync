@@ -1,6 +1,12 @@
 from sqlalchemy.orm import Session
 from app.db.models import Mark
-from fastapi import HTTPException, status
+
+
+class SemesterGuardBlocked(Exception):
+    def __init__(self, detail: str, code: str = "SEMESTER_GUARD_BLOCKED"):
+        self.detail = detail
+        self.code = code
+
 
 class SemesterGuard:
     # State list
@@ -41,13 +47,9 @@ class SemesterGuard:
         Block transcript uploads if semester is 1.
         """
         if current_semester < 2:
-            # We raise a custom exception that endpoints can catch and serialize correctly
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail={
-                    "detail": "Transcript upload available from Semester 2 onwards",
-                    "code": "SEMESTER_GUARD_BLOCKED"
-                }
+            raise SemesterGuardBlocked(
+                detail="Transcript upload available from Semester 2 onwards",
+                code="SEMESTER_GUARD_BLOCKED"
             )
 
     @classmethod

@@ -248,5 +248,15 @@ input:focus, textarea:focus, select:focus {
   }
   html {
     @apply font-sans;
+    font-size: 15px;
   }
+  @media (min-width: 768px) {
+    html {
+      font-size: 16px;
+    }
+  }
+}
+
+.page-container {
+  @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
