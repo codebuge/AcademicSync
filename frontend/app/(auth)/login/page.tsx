@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Loader2, CheckCircle } from 'lucide-react'
+
+
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -18,7 +20,19 @@ type LoginForm = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const router = useRouter()
+  const [registered, setRegistered] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('registered') === '1') {
+        setRegistered(true)
+      }
+    }
+  }, [])
+
+
   const [authError, setAuthError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -55,7 +69,16 @@ export default function LoginPage() {
       <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Welcome back</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>Sign in to your account</p>
 
+      {registered && (
+        <div className="mb-4 p-3 rounded-lg text-sm flex gap-2.5 items-start animate-slide-down"
+          style={{ background: 'rgba(45,212,191,0.08)', border: '1px solid rgba(45,212,191,0.3)', color: '#2dd4bf' }}>
+          <CheckCircle size={16} className="shrink-0 mt-0.5" />
+          <span>Account created successfully! Sign in to continue.</span>
+        </div>
+      )}
+
       {authError && (
+
         <div className="mb-4 p-3 rounded-lg text-sm animate-slide-down"
           style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'hsl(0,84%,70%)' }}>
           {authError}

@@ -7,6 +7,7 @@ import { TrendingUp, BookOpen, Award, Calendar, ArrowUpRight, BarChart3 } from '
 import { getGpaColor } from '@/lib/utils'
 import { GPAChart } from '@/components/GPAChart'
 import { CGPACard } from '@/components/CGPACard'
+import { StatusBadge } from '@/components/StatusBadge'
 import type { CgpaResponse, Mark, SemesterAnalysis } from '@/types'
 import Link from 'next/link'
 
@@ -81,12 +82,6 @@ export default function DashboardPage() {
   const recentMarks = [...marks].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5)
   const latestGpa = semesters.length ? semesters[semesters.length - 1].gpa : 0
 
-  const statusColors: Record<string, string> = {
-    draft: 'badge-draft',
-    pending_verification: 'badge-pending',
-    verified: 'badge-verified',
-    locked: 'badge-locked',
-  }
 
   if (loading) {
     return (
@@ -176,9 +171,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-right shrink-0">
                   <p className={`text-xs font-bold ${getGpaColor(m.score / 25)}`}>{m.score}%</p>
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${statusColors[m.status] || 'badge-draft'}`}>
-                    {m.status.replace('_', ' ')}
-                  </span>
+                  <StatusBadge status={m.status} />
                 </div>
               </div>
             ))}

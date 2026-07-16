@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowUpDown } from 'lucide-react'
+import { StatusBadge } from '@/components/StatusBadge'
 import type { Mark } from '@/types'
 
 interface MarksTableProps {
@@ -10,12 +11,6 @@ interface MarksTableProps {
 
 type SortKey = 'course_name' | 'semester' | 'score' | 'credit_hours' | 'status'
 
-const statusConfig: Record<string, { label: string; bg: string; color: string }> = {
-  draft: { label: 'Draft', bg: 'rgba(100,116,139,0.15)', color: '#94a3b8' },
-  pending_verification: { label: 'Pending', bg: 'rgba(245,158,11,0.15)', color: '#fbbf24' },
-  verified: { label: 'Verified', bg: 'rgba(45,212,191,0.15)', color: '#2dd4bf' },
-  locked: { label: 'Locked', bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' },
-}
 
 export function MarksTable({ marks }: MarksTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('course_name')
@@ -76,7 +71,6 @@ export function MarksTable({ marks }: MarksTableProps) {
           </thead>
           <tbody>
             {sorted.map((mark, i) => {
-              const status = statusConfig[mark.status] || statusConfig.draft
               const scoreColor = mark.score >= 80 ? '#2dd4bf' : mark.score >= 60 ? '#fbbf24' : '#f87171'
               return (
                 <tr key={mark.id}
@@ -95,10 +89,7 @@ export function MarksTable({ marks }: MarksTableProps) {
                     <span className="font-medium text-xs" style={{ color: 'var(--foreground)' }}>{mark.letter_grade || '—'}</span>
                   </td>
                   <td className="py-3 px-3">
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ background: status.bg, color: status.color }}>
-                      {status.label}
-                    </span>
+                    <StatusBadge status={mark.status} />
                   </td>
                 </tr>
               )
@@ -110,7 +101,6 @@ export function MarksTable({ marks }: MarksTableProps) {
       {/* Mobile Card View */}
       <div className="block md:hidden space-y-3">
         {sorted.map((mark) => {
-          const status = statusConfig[mark.status] || statusConfig.draft
           const scoreColor = mark.score >= 80 ? '#2dd4bf' : mark.score >= 60 ? '#fbbf24' : '#f87171'
           return (
             <div key={mark.id} className="glass rounded-xl p-4 border" style={{ borderColor: 'var(--border)' }}>
@@ -119,10 +109,7 @@ export function MarksTable({ marks }: MarksTableProps) {
                   <p className="font-semibold text-sm text-white truncate max-w-[180px]">{mark.course_name}</p>
                   <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.semester} · {mark.credit_hours} cr</p>
                 </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0"
-                  style={{ background: status.bg, color: status.color }}>
-                  {status.label}
-                </span>
+                <StatusBadge status={mark.status} />
               </div>
               <div className="flex justify-between items-center mt-3 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
                 <span className="text-[11px] capitalize" style={{ color: 'var(--muted-foreground)' }}>Source: {mark.source}</span>

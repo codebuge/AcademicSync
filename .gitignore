@@ -1,0 +1,26 @@
+# Local dev artifacts
+*.db
+*.sqlite3
+gpa_tracker.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Test artifacts
+frontend/test-results/
+frontend/playwright-report/
+
+# Build artifacts (not needed in VCS)
+frontend/.next/
+frontend/node_modules/
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Skills lock (agent tooling - not project code)
+skills-lock.json

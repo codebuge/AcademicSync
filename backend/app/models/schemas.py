@@ -23,6 +23,10 @@ class UserResponse(UserBase):
 class SemesterUpdate(BaseModel):
     current_semester: Optional[int] = Field(None, ge=1, le=12)
 
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+
+
 
 # --- Mark Schemas ---
 class MarkBase(BaseModel):

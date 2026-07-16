@@ -6,13 +6,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { useAppStore } from '@/store/useAppStore'
-import { LayoutDashboard, BookOpen, FileText, TrendingUp, LogOut, Menu, X, GraduationCap, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, BookOpen, FileText, TrendingUp, LogOut, Menu, X, GraduationCap, ChevronRight, Settings } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/marks', icon: BookOpen, label: 'Marks' },
   { href: '/transcript', icon: FileText, label: 'Transcript' },
   { href: '/analysis', icon: TrendingUp, label: 'Analysis' },
+  { href: '/settings', icon: Settings, label: 'Settings' },
 ]
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
@@ -100,7 +101,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     '/marks': 'Marks Entry',
     '/transcript': 'Transcript Upload',
     '/analysis': 'GPA Analysis',
-    '/settings': 'Settings'
+    '/settings': 'Settings',
   }
   const pageTitle = titleMap[pathname] || 'AcademicSync'
 
@@ -164,12 +165,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {user && (
             <div className="flex items-center gap-3">
               <span className="text-sm hidden sm:block" style={{ color: 'var(--muted-foreground)' }}>
-                {user.email}
+                {user.full_name || user.email}
               </span>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white' }}>
-                {(user.full_name || user.email || 'U')[0].toUpperCase()}
-              </div>
+              <Link href="/settings">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold cursor-pointer hover:opacity-80 transition-opacity"
+                  style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white' }}
+                  title="Go to Settings">
+                  {(user.full_name || user.email || 'U')[0].toUpperCase()}
+                </div>
+              </Link>
             </div>
           )}
         </header>

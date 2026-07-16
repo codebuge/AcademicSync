@@ -21,7 +21,8 @@ from app.models.schemas import (
     UserResponse, MarkCreate, MarkResponse, TranscriptResponse,
     OcrResponse, OcrGradingScaleResponse, GpaResponse, CgpaResponse,
     ProjectionResponse, ReconciliationResponse, PerformanceAnalysisResponse, SemesterAnalysis,
-    MarkUpdate, GpaHistoryResponse, SemesterUpdate, PublicGpaRequest, PublicGpaResponse
+    MarkUpdate, GpaHistoryResponse, SemesterUpdate, PublicGpaRequest, PublicGpaResponse,
+    UserUpdate
 )
 import time
 
@@ -325,6 +326,31 @@ def get_me(current_user: User = Depends(get_current_user)):
     """
     Get current user profile.
     """
+    return current_user
+
+
+@router.patch("/users/me", response_model=UserResponse)
+def update_me(
+    payload: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Update current user profile.
+    """
+    if payload.full_name is not None:
+        current_user.full_name = payload.full_name
+        # If Supabase client is active, update Supabase user metadata as well
+        if supabase_client:
+            try:
+                supabase_client.auth.admin.update_user_by_id(
+                    current_user.id,
+                    {"user_metadata": {"full_name": payload.full_name}}
+                )
+            except Exception as e:
+                print(f"Failed to update Supabase metadata: {e}")
+    db.commit()
+    db.refresh(current_user)
     return current_user
 
 
