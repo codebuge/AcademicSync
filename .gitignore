@@ -12,6 +12,9 @@ __pycache__/
 # Test artifacts
 frontend/test-results/
 frontend/playwright-report/
+frontend/tests/screenshots/
+backend/tests/reports/
+
 
 # Build artifacts (not needed in VCS)
 frontend/.next/
