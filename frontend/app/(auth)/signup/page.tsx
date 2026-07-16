@@ -6,7 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { UserPlus, Loader2, TriangleAlert, XCircle, Upload, Image as ImageIcon, Sparkles, X } from 'lucide-react'
+import { 
+  UserPlus, Loader2, TriangleAlert, XCircle, 
+  Image as ImageIcon, Sparkles, X, ArrowRight, Info 
+} from 'lucide-react'
 
 const signupSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -43,12 +46,14 @@ export default function SignupPage() {
     setHasDraft(false)
   }
 
-
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignupForm>({ resolver: zodResolver(signupSchema), defaultValues: { current_semester: 1 } })
+  } = useForm<SignupForm>({ 
+    resolver: zodResolver(signupSchema), 
+    defaultValues: { current_semester: 1 } 
+  })
 
   const handleFileChange = (file: File) => {
     setGradingFile(file)
@@ -96,122 +101,171 @@ export default function SignupPage() {
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Create account</h2>
-      <p className="text-sm mb-5" style={{ color: 'var(--muted-foreground)' }}>Start tracking your academic performance</p>
+      <header className="text-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-semibold text-[#1a1c1b] tracking-tight mb-2">Create your account</h1>
+        <p className="text-sm text-[#3f4944]">Track your GPA and CGPA automatically</p>
+      </header>
 
+      {/* Dismissible Amber Alert */}
       {hasDraft && (
-        <div className="mb-4 p-3 rounded-lg text-sm flex justify-between items-start gap-2.5 animate-slide-down"
-          style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)', color: 'hsl(38,92%,70%)' }}>
-          <div className="flex gap-2 items-start">
-            <Sparkles size={16} className="shrink-0 mt-0.5" style={{ color: 'hsl(38,92%,55%)' }} />
-            <span>We saved your GPA calculation — sign up to keep it.</span>
-          </div>
-          <button type="button" onClick={handleDismissDraft} className="p-0.5 hover:opacity-75 transition-opacity shrink-0">
+        <div className="bg-[#FFF8E1] border border-[#FFECB3] rounded-lg p-3 flex items-start gap-3 mb-6 transition-all duration-300 animate-slide-down">
+          <Info className="text-[#FFA000] shrink-0 mt-0.5" size={20} />
+          <p className="text-sm text-[#5D4037] flex-1">We saved your GPA calculation — sign up to keep it</p>
+          <button 
+            type="button" 
+            onClick={handleDismissDraft} 
+            className="text-[#5D4037] hover:bg-[#FFECB3] rounded-full p-1 transition-colors shrink-0"
+          >
             <X size={16} />
           </button>
         </div>
       )}
 
       {authError && (
-        <div className="mb-4 p-3 rounded-lg text-sm animate-slide-down"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'hsl(0,84%,70%)' }}>
+        <div className="mb-4 p-3 rounded-lg text-sm bg-[#ffdad6] border border-[#ffb4a4] text-[#ba1a1a] animate-slide-down">
           {authError}
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="col-span-2">
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>Full Name</label>
-            <input {...register('full_name')} placeholder="Ahmad Khan"
-              className="w-full px-3 py-2 rounded-lg text-sm"
-              style={{ background: 'var(--muted)', border: errors.full_name ? '1px solid rgba(239,68,68,0.6)' : '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }} />
-            {errors.full_name && <p className="text-xs mt-0.5" style={{ color: 'hsl(0,84%,60%)' }}>{errors.full_name.message}</p>}
-          </div>
-
-          <div className="col-span-2">
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>Email</label>
-            <input {...register('email')} type="email" placeholder="you@university.edu"
-              className="w-full px-3 py-2 rounded-lg text-sm"
-              style={{ background: 'var(--muted)', border: errors.email ? '1px solid rgba(239,68,68,0.6)' : '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }} />
-            {errors.email && <p className="text-xs mt-0.5" style={{ color: 'hsl(0,84%,60%)' }}>{errors.email.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>Password</label>
-            <input {...register('password')} type="password" placeholder="Min 8 chars"
-              className="w-full px-3 py-2 rounded-lg text-sm"
-              style={{ background: 'var(--muted)', border: errors.password ? '1px solid rgba(239,68,68,0.6)' : '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }} />
-            {errors.password && <p className="text-xs mt-0.5" style={{ color: 'hsl(0,84%,60%)' }}>{errors.password.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>Current Semester</label>
-            <select {...register('current_semester', { valueAsNumber: true })}
-              className="w-full px-3 py-2 rounded-lg text-sm"
-              style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }}>
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>Semester {i + 1}</option>
-              ))}
-            </select>
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Full Name */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-[#3f4944] block" htmlFor="full_name">
+            Full Name
+          </label>
+          <input
+            {...register('full_name')}
+            type="text"
+            id="full_name"
+            placeholder="John Doe"
+            className={`w-full h-12 px-4 bg-[#F1F1F1] rounded-lg text-sm transition-all duration-200 outline-none focus:bg-white focus:ring-1 focus:ring-[#005440] border ${
+              errors.full_name ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : 'border-transparent focus:border-[#005440]'
+            }`}
+          />
+          {errors.full_name && (
+            <p className="text-xs text-[#ba1a1a] mt-1">{errors.full_name.message}</p>
+          )}
         </div>
 
-        {/* Grading Scale Upload */}
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
-            Grading Scale Screenshot <span style={{ color: 'var(--primary)' }}>*</span>
+        {/* Email Address */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-[#3f4944] block" htmlFor="email">
+            Email Address
           </label>
-          <div
+          <input
+            {...register('email')}
+            type="email"
+            id="email"
+            placeholder="you@university.edu"
+            className={`w-full h-12 px-4 bg-[#F1F1F1] rounded-lg text-sm transition-all duration-200 outline-none focus:bg-white focus:ring-1 focus:ring-[#005440] border ${
+              errors.email ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : 'border-transparent focus:border-[#005440]'
+            }`}
+          />
+          {errors.email && (
+            <p className="text-xs text-[#ba1a1a] mt-1">{errors.email.message}</p>
+          )}
+        </div>
+
+        {/* Password */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-[#3f4944] block" htmlFor="password">
+            Password
+          </label>
+          <input
+            {...register('password')}
+            type="password"
+            id="password"
+            placeholder="••••••••"
+            className={`w-full h-12 px-4 bg-[#F1F1F1] rounded-lg text-sm transition-all duration-200 outline-none focus:bg-white focus:ring-1 focus:ring-[#005440] border ${
+              errors.password ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : 'border-transparent focus:border-[#005440]'
+            }`}
+          />
+          {errors.password && (
+            <p className="text-xs text-[#ba1a1a] mt-1">{errors.password.message}</p>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="relative py-2 flex items-center">
+          <div className="flex-grow border-t border-[#bec9c3]/50"></div>
+          <span className="flex-shrink mx-4 text-xs font-semibold text-[#6f7a74] uppercase tracking-wider">
+            Grading scale verification
+          </span>
+          <div className="flex-grow border-t border-[#bec9c3]/50"></div>
+        </div>
+
+        {/* Verification Row */}
+        <div className="flex gap-4 items-end">
+          {/* Dropzone */}
+          <div 
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFileChange(f) }}
             onClick={() => fileRef.current?.click()}
-            className="relative rounded-xl cursor-pointer transition-all duration-200 overflow-hidden"
-            style={{
-              border: isDragging ? '2px dashed var(--primary)' : '2px dashed var(--border)',
-              background: isDragging ? 'rgba(45,212,191,0.05)' : 'var(--muted)',
-              minHeight: preview ? '120px' : '80px',
-            }}>
-            <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileChange(f) }} />
+            className={`flex-[2] h-28 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer p-2 text-center group transition-all ${
+              isDragging 
+                ? 'border-[#005440] bg-[#e2f3ee]' 
+                : 'border-[#bec9c3] bg-[#F9F9F7] hover:border-[#005440] hover:bg-white'
+            }`}
+          >
+            <input 
+              ref={fileRef} 
+              type="file" 
+              accept="image/png,image/jpeg,image/webp" 
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileChange(f) }} 
+            />
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="Grading scale preview" className="w-full h-32 object-cover" />
+              <img src={preview} alt="Grading scale preview" className="w-full h-full object-cover rounded-md" />
             ) : (
-              <div className="flex flex-col items-center justify-center py-5 gap-2">
-                <ImageIcon size={24} style={{ color: 'var(--muted-foreground)' }} />
-                <p className="text-xs text-center" style={{ color: 'var(--muted-foreground)' }}>
-                  Drop your grading scale screenshot here<br />
-                  <span style={{ color: 'var(--primary)' }}>or click to browse</span>
-                </p>
-                <p className="text-xs" style={{ color: 'var(--muted-foreground)', opacity: 0.6 }}>PNG, JPG, WebP · max 5MB</p>
-              </div>
+              <>
+                <ImageIcon size={20} className="text-[#6f7a74] group-hover:text-[#005440] transition-colors mb-1" />
+                <p className="text-xs text-[#1a1c1b] font-semibold">Upload grading scale</p>
+                <p className="text-[10px] leading-tight text-[#3f4944] mt-1">PNG, JPG up to 5MB</p>
+              </>
             )}
           </div>
-          {gradingFile && !preview && (
-            <p className="text-xs mt-1" style={{ color: 'var(--primary)' }}>{gradingFile.name}</p>
-          )}
+
+          {/* Current Semester */}
+          <div className="flex-1 space-y-1">
+            <label className="text-xs font-semibold text-[#3f4944] block" htmlFor="current_semester">
+              Semester
+            </label>
+            <input
+              {...register('current_semester', { valueAsNumber: true })}
+              type="number"
+              id="current_semester"
+              min="1"
+              max="12"
+              className="w-full h-20 bg-[#F1F1F1] border-transparent rounded-lg px-4 text-3xl font-bold text-center focus:bg-white focus:ring-1 focus:ring-[#005440] focus:border-[#005440] outline-none"
+            />
+          </div>
         </div>
 
-        {/* OCR Error Panels — DISTINCT by design */}
+        {gradingFile && (
+          <p className="text-xs text-[#005440] font-semibold">Selected file: {gradingFile.name}</p>
+        )}
+
+        {/* OCR Error Panels */}
         {ocrError === 'GRADING_SCALE_LOW_CONFIDENCE' && (
-          <div className="rounded-xl p-4 animate-slide-down"
-            style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.35)' }}>
+          <div className="rounded-xl p-4 bg-[#FFF8E1] border border-[#FFECB3] text-[#5D4037] animate-slide-down">
             <div className="flex gap-3">
-              <TriangleAlert size={20} className="shrink-0 mt-0.5" style={{ color: 'hsl(38,92%,55%)' }} />
+              <TriangleAlert size={20} className="shrink-0 mt-0.5 text-[#FFA000]" />
               <div className="flex-1">
-                <p className="text-sm font-medium mb-1" style={{ color: 'hsl(38,92%,70%)' }}>Photo too blurry or unclear</p>
-                <p className="text-xs mb-3" style={{ color: 'hsl(38,92%,55%)' }}>
+                <p className="text-sm font-semibold mb-1">Photo too blurry or unclear</p>
+                <p className="text-xs mb-3 text-[#795548]">
                   Try better lighting and make sure the table isn&apos;t tilted or blurry. Hold the camera steady and shoot straight-on.
                 </p>
-                <p className="text-xs font-medium mb-2" style={{ color: 'hsl(38,92%,55%)' }}>Example of a good photo:</p>
+                <p className="text-xs font-semibold mb-2 text-[#795548]">Example of a good photo:</p>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/grading_scale_example.png" alt="Example grading scale photo"
-                  className="w-full rounded-lg object-cover" style={{ maxHeight: '120px', border: '1px solid rgba(245,158,11,0.25)' }} />
-                <button type="button" onClick={() => { setOcrError(null); setGradingFile(null); setPreview(null) }}
-                  className="mt-3 text-xs px-3 py-1.5 rounded-lg font-medium transition-all"
-                  style={{ background: 'rgba(245,158,11,0.2)', color: 'hsl(38,92%,70%)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  className="w-full rounded-lg object-cover" style={{ maxHeight: '120px', border: '1px solid #FFECB3' }} />
+                <button 
+                  type="button" 
+                  onClick={() => { setOcrError(null); setGradingFile(null); setPreview(null) }}
+                  className="mt-3 text-xs px-3 py-1.5 rounded-lg font-semibold bg-[#FFE082] hover:bg-[#FFD54F] text-[#5D4037] border border-[#FFD54F] transition-all"
+                >
                   Try again with a clearer photo
                 </button>
               </div>
@@ -220,21 +274,22 @@ export default function SignupPage() {
         )}
 
         {ocrError === 'GRADING_SCALE_MALFORMED' && (
-          <div className="rounded-xl p-4 animate-slide-down"
-            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.35)' }}>
+          <div className="rounded-xl p-4 bg-[#ffdad6] border border-[#ffb4a4] text-[#ba1a1a] animate-slide-down">
             <div className="flex gap-3">
-              <XCircle size={20} className="shrink-0 mt-0.5" style={{ color: 'hsl(0,84%,65%)' }} />
+              <XCircle size={20} className="shrink-0 mt-0.5 text-[#ba1a1a]" />
               <div className="flex-1">
-                <p className="text-sm font-medium mb-1" style={{ color: 'hsl(0,84%,70%)' }}>Grading table not found</p>
-                <p className="text-xs mb-3" style={{ color: 'hsl(0,84%,55%)' }}>
+                <p className="text-sm font-semibold mb-1">Grading table not found</p>
+                <p className="text-xs mb-3 text-[#ba1a1a]/80">
                   We couldn&apos;t find a grading table in that image. Please upload a clear photo of your university&apos;s grading scale table — not a transcript, syllabus, or other document.
                 </p>
-                <p className="text-xs mb-2" style={{ color: 'hsl(0,84%,55%)' }}>
+                <p className="text-xs mb-2 text-[#ba1a1a]/80">
                   The table should show: <strong>percentage ranges → letter grades → GPA points</strong>
                 </p>
-                <button type="button" onClick={() => { setOcrError(null); setGradingFile(null); setPreview(null) }}
-                  className="text-xs px-3 py-1.5 rounded-lg font-medium transition-all"
-                  style={{ background: 'rgba(239,68,68,0.2)', color: 'hsl(0,84%,70%)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                <button 
+                  type="button" 
+                  onClick={() => { setOcrError(null); setGradingFile(null); setPreview(null) }}
+                  className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-[#ffb4a4] hover:bg-[#ff8a80] text-[#ba1a1a] border border-[#ff8a80] transition-all"
+                >
                   Upload correct image
                 </button>
               </div>
@@ -242,22 +297,35 @@ export default function SignupPage() {
           </div>
         )}
 
-        <button type="submit" disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-          style={{
-            background: isLoading ? 'var(--muted)' : 'linear-gradient(135deg, var(--primary), hsl(168,84%,30%))',
-            color: 'white',
-            boxShadow: isLoading ? 'none' : '0 4px 16px var(--teal-glow)',
-          }}>
-          {isLoading ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
-          {isLoading ? 'Processing grading scale...' : 'Create Account'}
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-14 bg-[#a83820] hover:bg-[#87200a] text-white font-medium text-sm rounded-lg shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              <span>Creating account...</span>
+            </>
+          ) : (
+            <>
+              <span>Create account</span>
+              <ArrowRight size={18} />
+            </>
+          )}
         </button>
       </form>
 
-      <p className="text-center text-sm mt-5" style={{ color: 'var(--muted-foreground)' }}>
-        Already have an account?{' '}
-        <Link href="/login" className="font-medium hover:underline" style={{ color: 'var(--primary)' }}>Sign in</Link>
-      </p>
+      {/* Footer */}
+      <footer className="mt-6 text-center">
+        <p className="text-sm text-[#3f4944]">
+          Already have an account?{' '}
+          <Link href="/login" className="text-[#005440] font-semibold hover:underline">
+            Log in
+          </Link>
+        </p>
+      </footer>
     </>
   )
 }
