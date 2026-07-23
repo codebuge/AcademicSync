@@ -38,12 +38,29 @@ def get_current_user(
         
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
-        # If user is valid in Supabase but doesn't exist in our public profiles yet,
-        # we can sync them on the fly if needed, or raise exception.
-        # Let's check: during tests or first login, we might want to sync.
-        # But generally they should exist via trigger on Postgres. For local tests:
-        # we will ensure the test setup creates the user.
-        raise credentials_exception
+        # If user is valid in Supabase but profile row is missing in local DB, auto-sync on the fly
+        email = payload.get("email", f"{user_id}@example.com")
+        user_metadata = payload.get("user_metadata") or {}
+        full_name = user_metadata.get("full_name") if isinstance(user_metadata, dict) else None
+        current_semester = user_metadata.get("current_semester", 1) if isinstance(user_metadata, dict) else 1
+        role = user_metadata.get("role", "student") if isinstance(user_metadata, dict) else "student"
+
+        user = User(
+            id=user_id,
+            email=email,
+            full_name=full_name,
+            role=role if isinstance(role, str) else "student",
+            current_semester=current_semester if isinstance(current_semester, int) else 1
+        )
+        db.add(user)
+        try:
+            db.commit()
+            db.refresh(user)
+        except Exception:
+            db.rollback()
+            user = db.query(User).filter(User.id == user_id).first()
+            if user is None:
+                raise credentials_exception
     return user
 
 def require_role(roles: list[str]):

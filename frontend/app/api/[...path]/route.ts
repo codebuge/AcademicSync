@@ -41,13 +41,17 @@ async function proxyRequest(request: NextRequest) {
   }
   const targetUrl = `${cleanBackendUrl}${cleanPathname}${search}`
 
-  // Get the auth token from Supabase session
+  // Get the auth token from Supabase session (server-side cookies)
   const token = await getSupabaseToken()
 
   // Build headers to forward
   const headers: Record<string, string> = {}
 
-  if (token) {
+  // Prefer incoming request Authorization header if present, else fallback to token from server cookie
+  const incomingAuth = request.headers.get('authorization')
+  if (incomingAuth) {
+    headers['Authorization'] = incomingAuth
+  } else if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
 

@@ -413,6 +413,18 @@ def create_mark(
             letter_grade = row.letter_grade
             break
 
+    if not letter_grade:
+        if mark_in.score >= 85:
+            letter_grade = "A"
+        elif mark_in.score >= 75:
+            letter_grade = "B"
+        elif mark_in.score >= 65:
+            letter_grade = "C"
+        elif mark_in.score >= 50:
+            letter_grade = "D"
+        else:
+            letter_grade = "F"
+
     mark = Mark(
         student_id=student_id,
         course_name=mark_in.course_name,
