@@ -67,7 +67,10 @@ export default function MarksPage() {
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
+      if (!session) {
+        setFormError('Session expired or authentication required. Please log in again.')
+        return
+      }
       const base = '/api'
       const res = await fetch(`${base}/marks`, {
         method: 'POST',
@@ -87,8 +90,16 @@ export default function MarksPage() {
         setSuccessMsg('Mark added successfully!')
         setTimeout(() => setSuccessMsg(null), 3000)
       } else {
-        const err = await res.json()
-        setFormError(err.detail || 'Failed to add mark')
+        const err = await res.json().catch(() => ({}))
+        const detail = err?.detail
+        const errorMsg = typeof detail === 'string'
+          ? detail
+          : Array.isArray(detail)
+            ? detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ')
+            : typeof detail === 'object' && detail !== null
+              ? JSON.stringify(detail)
+              : 'Failed to add mark'
+        setFormError(errorMsg)
       }
     } catch {
       setFormError('Network error occurred. Please try again.')
