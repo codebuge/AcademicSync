@@ -12,9 +12,9 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./gpa_tracker.db"
 
     # Supabase config
-    SUPABASE_URL: Optional[str] = "https://vfowzqnbwzydujjxnshi.supabase.co"
+    SUPABASE_URL: Optional[str] = None
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
-    SUPABASE_JWT_SECRET: Optional[str] = "954caa74-d560-42d5-a993-0e86ef68376c"
+    SUPABASE_JWT_SECRET: Optional[str] = None
 
     # OCR & Google Vision
     GOOGLE_VISION_API_KEY: Optional[str] = None

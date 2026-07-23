@@ -23,12 +23,10 @@ def get_current_user(
     if not token:
         raise credentials_exception
 
-    # Attempt JWT decoding using configured secrets with fallbacks
+    # Attempt JWT decoding using configured secrets
     secrets_to_try = []
     if settings.SUPABASE_JWT_SECRET:
         secrets_to_try.append(settings.SUPABASE_JWT_SECRET)
-    # Project default Supabase JWT secret fallback
-    secrets_to_try.append("954caa74-d560-42d5-a993-0e86ef68376c")
     if settings.SECRET_KEY:
         secrets_to_try.append(settings.SECRET_KEY)
 
