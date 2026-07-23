@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { Eye, EyeOff, Loader2, CheckCircle, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, Loader2, CheckCircle, ArrowRight, AlertCircle } from 'lucide-react'
 
 const resetPasswordSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -24,12 +24,54 @@ export default function ResetPasswordPage() {
   const [authError, setAuthError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isVerifyingSession, setIsVerifyingSession] = useState(true)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ResetPasswordForm>({ resolver: zodResolver(resetPasswordSchema) })
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    const handleRecoverySession = async () => {
+      try {
+        // Check for PKCE code in URL query params
+        const searchParams = new URLSearchParams(window.location.search)
+        const code = searchParams.get('code')
+
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
+          if (error) {
+            setAuthError('Invalid or expired reset link. Please request a new password reset.')
+          }
+        } else {
+          // Check existing session or URL hash fragment
+          const { data: { session } } = await supabase.auth.getSession()
+          if (!session && !window.location.hash.includes('access_token')) {
+            setAuthError('No active recovery session found. Please click the reset link in your email again.')
+          }
+        }
+      } catch {
+        setAuthError('Failed to verify recovery link.')
+      } finally {
+        setIsVerifyingSession(false)
+      }
+    }
+
+    handleRecoverySession()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || session) {
+        setAuthError(null)
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const onSubmit = async (data: ResetPasswordForm) => {
     setIsLoading(true)
@@ -63,7 +105,12 @@ export default function ResetPasswordPage() {
         <p className="text-sm text-[#3f4944]">Enter your new password below to secure your account</p>
       </header>
 
-      {success ? (
+      {isVerifyingSession ? (
+        <div className="flex flex-col items-center justify-center py-8 gap-3 text-[#3f4944]">
+          <Loader2 size={28} className="animate-spin text-[#005440]" />
+          <p className="text-sm font-medium">Verifying reset link...</p>
+        </div>
+      ) : success ? (
         <div className="p-4 rounded-xl text-sm flex flex-col items-center text-center gap-3 bg-[#e2f3ee] border border-[#a0f3d4] text-[#00513e] animate-slide-down">
           <div className="w-10 h-10 rounded-full bg-[#00513e]/10 flex items-center justify-center">
             <CheckCircle size={24} className="text-[#00513e]" />

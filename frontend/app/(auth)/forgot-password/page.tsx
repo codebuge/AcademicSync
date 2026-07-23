@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -24,6 +24,22 @@ export default function ForgotPasswordPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotPasswordForm>({ resolver: zodResolver(forgotPasswordSchema) })
+
+  // Check URL query string or hash fragment for errors from Supabase (e.g. otp_expired)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const urlParams = new URLSearchParams(window.location.search)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1))
+
+    const errorCode = urlParams.get('error_code') || hashParams.get('error_code')
+    const errorDesc = urlParams.get('error_description') || hashParams.get('error_description')
+
+    if (errorCode === 'otp_expired' || errorDesc?.includes('expired')) {
+      setAuthError('Your password reset link has expired or was already used. Please enter your email below to receive a new link.')
+    } else if (errorDesc) {
+      setAuthError(decodeURIComponent(errorDesc.replace(/\+/g, ' ')))
+    }
+  }, [])
 
   const onSubmit = async (data: ForgotPasswordForm) => {
     setIsLoading(true)
