@@ -57,7 +57,9 @@ def score_to_gpa(score: float, scale_rows: List[Any]) -> Optional[float]:
 
     matching_rows = [
         row for row in scale_rows
-        if score >= row.min_percent and (row.max_percent is None or score <= row.max_percent)
+        if row.min_percent is not None
+        and score >= row.min_percent
+        and (row.max_percent is None or score <= row.max_percent)
     ]
     if not matching_rows:
         # No row covers this score at all — that's a data/config issue,
@@ -69,6 +71,34 @@ def score_to_gpa(score: float, scale_rows: List[Any]) -> Optional[float]:
     # If gpa_points is None here, it's because THIS row was matched and is
     # explicitly marked as excluded (e.g. Incomplete/Withdrawn/Freeze band).
     return best_row.gpa_points
+
+
+def calculate_private_gpa(
+    marks: List[Any],
+    scale_rows: List[Any] = None,
+    strict: bool = True,
+) -> float:
+    """
+    PRIVATE PATHWAY: Calculate semester GPA for authenticated users.
+
+    Requires marks to have verified or locked status (GPA_ELIGIBLE_STATUSES).
+    Excludes draft/pending marks and non-numeric grade exclusions (I/W/FRZ).
+    """
+    return calculate_gpa(marks, scale_rows, strict=strict)
+
+
+def calculate_private_cgpa(
+    all_marks: List[Any],
+    scale_rows: List[Any] = None,
+    strict: bool = True,
+) -> float:
+    """
+    PRIVATE PATHWAY: Calculate cumulative CGPA for authenticated users.
+
+    Requires marks to have verified or locked status (GPA_ELIGIBLE_STATUSES).
+    Excludes draft/pending marks and non-numeric grade exclusions (I/W/FRZ).
+    """
+    return calculate_cgpa(all_marks, scale_rows, strict=strict)
 
 
 def calculate_gpa(
@@ -85,13 +115,6 @@ def calculate_gpa(
 
     Excludes marks whose grade is intentionally excluded from GPA
     (Incomplete/Withdrawn/Freeze), signaled by score_to_gpa returning None.
-
-    Args:
-        strict: if True (default), a score that matches no scale row at all
-            raises ScoreOutOfRangeError instead of being silently dropped.
-            Set to False only for tolerant/preview contexts where you've
-            decided out-of-range scores should be skipped — do this
-            explicitly, never as the default.
     """
     if scale_rows is None:
         scale_rows = []
@@ -108,8 +131,6 @@ def calculate_gpa(
         except ScoreOutOfRangeError:
             if strict:
                 raise
-            # Explicitly opted into tolerant mode: skip this mark, but this
-            # is a data issue, not an exclusion — don't relabel it as one.
             continue
 
         if gp is not None:
@@ -251,7 +272,7 @@ def calculate_gpa_from_courses(
     courses: List[Any],
     grading_scale: str = "4.0",
     scale_rows: List[Any] = None,
-    require_verified_status: bool = True,
+    require_verified_status: bool = False,
 ) -> float:
     """
     Secondary GPA calculation path used for course-level breakdowns/previews.
@@ -261,12 +282,10 @@ def calculate_gpa_from_courses(
     so it can no longer silently diverge from calculate_gpa/calculate_cgpa.
 
     Args:
-        scale_rows: the institution's actual grading scale. Previously this
-            function always called score_to_gpa(score, []), ignoring any
-            configured scale — that's fixed here.
-        require_verified_status: if True (default), only counts courses
-            whose status is verified/locked, matching the official GPA path.
-            Set False only for an explicit unverified preview feature.
+        scale_rows: the institution's actual grading scale.
+        require_verified_status: if True, only counts courses
+            whose status is verified/locked. Default is False for course-level
+            breakdowns/previews and public calculator usage where status is absent.
     """
     if scale_rows is None:
         scale_rows = []
@@ -274,10 +293,10 @@ def calculate_gpa_from_courses(
     eligible_courses = []
     for c in courses:
         score = getattr(c, "score", None)
-        if score is None:
+        if score is None and isinstance(c, dict):
             score = c.get("score", 0.0)
         credits = getattr(c, "credit_hours", None)
-        if credits is None:
+        if credits is None and isinstance(c, dict):
             credits = c.get("credit_hours", 0.0)
 
         if require_verified_status:
@@ -285,7 +304,7 @@ def calculate_gpa_from_courses(
             if status_val is None and isinstance(c, dict):
                 status_val = c.get("status", "")
             status_val = (status_val or "").lower()
-            if status_val not in GPA_ELIGIBLE_STATUSES:
+            if status_val and status_val not in GPA_ELIGIBLE_STATUSES:
                 continue
 
         gp = _score_to_gpa_for_scale(score, grading_scale, scale_rows)
@@ -305,6 +324,43 @@ def calculate_gpa_from_courses(
     return round(total_points / total_credits, 2)
 
 
+def calculate_public_gpa(
+    courses: List[Any],
+    grading_scale: str = "4.0",
+    scale_rows: List[Any] = None,
+) -> dict:
+    """
+    PUBLIC PATHWAY: Calculate instant GPA for public / unauthenticated users.
+
+    Accepts course inputs without requiring verification status.
+    Returns calculated GPA, total credit hours, and detailed course breakdown.
+    """
+    gpa = calculate_gpa_from_courses(
+        courses=courses,
+        grading_scale=grading_scale,
+        scale_rows=scale_rows,
+        require_verified_status=False
+    )
+
+    total_credit_hours = sum(
+        getattr(c, "credit_hours", None) or (c.get("credit_hours", 0.0) if isinstance(c, dict) else 0.0)
+        for c in courses
+    )
+
+    breakdown = get_course_breakdown(
+        courses=courses,
+        grading_scale=grading_scale,
+        scale_rows=scale_rows
+    )
+
+    return {
+        "gpa": gpa,
+        "total_credit_hours": total_credit_hours,
+        "course_breakdown": breakdown
+    }
+
+
+>>>>>>> 2e98b9e (fix(gpa-calc): separate public and private calculation pathways, fix mark entry and management)
 def get_course_breakdown(
     courses: List[Any],
     grading_scale: str = "4.0",

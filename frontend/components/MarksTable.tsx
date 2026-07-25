@@ -1,18 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowUpDown } from 'lucide-react'
+import { ArrowUpDown, Trash2 } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 import type { Mark } from '@/types'
 
 interface MarksTableProps {
   marks: Mark[]
+  onDeleteMark?: (markId: string) => void
 }
 
 type SortKey = 'course_name' | 'semester' | 'score' | 'credit_hours' | 'status'
 
 
-export function MarksTable({ marks }: MarksTableProps) {
+export function MarksTable({ marks, onDeleteMark }: MarksTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('course_name')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
 
@@ -67,6 +68,7 @@ export function MarksTable({ marks }: MarksTableProps) {
               <HeaderCell label="Credits" sortField="credit_hours" />
               <th className="text-left py-2.5 px-3 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Grade</th>
               <HeaderCell label="Status" sortField="status" />
+              <th className="text-right py-2.5 px-3 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -91,6 +93,17 @@ export function MarksTable({ marks }: MarksTableProps) {
                   <td className="py-3 px-3">
                     <StatusBadge status={mark.status} />
                   </td>
+                  <td className="py-3 px-3 text-right">
+                    {onDeleteMark && mark.status !== 'locked' && (
+                      <button
+                        onClick={() => onDeleteMark(mark.id)}
+                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
+                        title="Delete Mark"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </td>
                 </tr>
               )
             })}
@@ -109,7 +122,18 @@ export function MarksTable({ marks }: MarksTableProps) {
                   <p className="font-semibold text-sm text-white truncate max-w-[180px]">{mark.course_name}</p>
                   <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.semester} · {mark.credit_hours} cr</p>
                 </div>
-                <StatusBadge status={mark.status} />
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={mark.status} />
+                  {onDeleteMark && mark.status !== 'locked' && (
+                    <button
+                      onClick={() => onDeleteMark(mark.id)}
+                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
+                      title="Delete Mark"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="flex justify-between items-center mt-3 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
                 <span className="text-[11px] capitalize" style={{ color: 'var(--muted-foreground)' }}>Source: {mark.source}</span>

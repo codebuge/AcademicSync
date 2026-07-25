@@ -12,7 +12,8 @@ from app.core.config import settings
 from app.services.auth import get_current_user, require_role
 from app.services.calculations import (
     calculate_gpa, calculate_cgpa, get_cgpa_projection,
-    calculate_gpa_from_courses, get_course_breakdown
+    calculate_gpa_from_courses, get_course_breakdown,
+    calculate_public_gpa, calculate_private_gpa, calculate_private_cgpa
 )
 from app.services.semester_guard import SemesterGuard, SemesterGuardBlocked
 from app.services.pdf_parser import parse_transcript_pdf, reconcile_transcript, map_grade_to_score
@@ -109,17 +110,9 @@ def public_gpa_calculator(payload: PublicGpaRequest, request: Request):
             detail="Cannot calculate more than 20 courses at once."
         )
 
-    # 3. Calculate
+    # 3. Calculate via Public Pathway
     try:
-        gpa = calculate_gpa_from_courses(payload.courses, payload.grading_scale)
-        total_credit_hours = sum(c.credit_hours for c in payload.courses)
-        breakdown = get_course_breakdown(payload.courses, payload.grading_scale)
-        
-        return {
-            "gpa": gpa,
-            "total_credit_hours": total_credit_hours,
-            "course_breakdown": breakdown
-        }
+        return calculate_public_gpa(payload.courses, payload.grading_scale)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -433,7 +426,7 @@ def create_mark(
         semester=mark_in.semester,
         credit_hours=mark_in.credit_hours,
         letter_grade=letter_grade or mark_in.letter_grade,
-        status="draft",
+        status=getattr(mark_in, "status", None) or "verified",
         source="manual"
     )
     db.add(mark)
@@ -516,8 +509,8 @@ def delete_mark(
         raise HTTPException(status_code=404, detail="Mark not found.")
     if mark.student_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this mark.")
-    if mark.status not in ("draft", "pending_verification"):
-        raise HTTPException(status_code=403, detail="Cannot delete a verified or locked mark.")
+    if mark.status == "locked":
+        raise HTTPException(status_code=403, detail="Cannot delete a locked mark.")
 
     db.delete(mark)
     db.commit()
@@ -847,7 +840,7 @@ def get_semester_gpa(
     ).all()
     scale_rows = db.query(GradingScaleRow).filter(GradingScaleRow.user_id == current_user.id).all()
     
-    gpa = calculate_gpa(marks, scale_rows)
+    gpa = calculate_private_gpa(marks, scale_rows)
     verified_marks = [m for m in marks if m.status.lower() == "verified"]
     total_credits = sum(m.credit_hours for m in verified_marks)
     
@@ -869,7 +862,7 @@ def get_user_cgpa(
     all_marks = db.query(Mark).filter(Mark.student_id == current_user.id).all()
     scale_rows = db.query(GradingScaleRow).filter(GradingScaleRow.user_id == current_user.id).all()
     
-    cgpa = calculate_cgpa(all_marks, scale_rows)
+    cgpa = calculate_private_cgpa(all_marks, scale_rows)
     verified_marks = [m for m in all_marks if m.status.lower() == "verified"]
     total_verified_credits = sum(m.credit_hours for m in verified_marks)
     

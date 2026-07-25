@@ -51,3 +51,5 @@ Thumbs.db
 # Flutter config to ignore
 dart_defines.json
 
+.agents/skills/
+skills-lock.json

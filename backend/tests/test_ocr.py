@@ -40,6 +40,27 @@ class TestOcrGradingScaleErrorCodes:
         res_mal = parse_grading_scale_table(b"malformed")
         assert res_low["error_code"] != res_mal["error_code"]
 
+    def test_parse_grading_scale_table_mock_parsing(self, monkeypatch):
+        mock_raw_text = (
+            "91% - 100% A 4.00\n"
+            "80% - 90% A- 3.66\n"
+            "Below 50% F 0\n"
+            "- I Incomplete\n"
+            "- W Withdrawn\n"
+            "- Frz Freeze"
+        )
+        monkeypatch.setattr("app.services.ocr._call_vision_api_key", lambda b, k: {
+            "textAnnotations": [{"description": mock_raw_text}]
+        })
+        res = parse_grading_scale_table(b"valid_image_bytes")
+        assert res["flagged"] is False
+        rows = res["rows"]
+        assert len(rows) == 6
+        assert rows[0]["min_percent"] == 91.0 and rows[0]["max_percent"] == 100.0
+        assert rows[1]["min_percent"] == 80.0 and rows[1]["max_percent"] == 90.0
+        assert rows[3]["letter_grade"] == "I" and rows[3]["min_percent"] is None and rows[3]["gpa_points"] is None
+        assert rows[4]["letter_grade"] == "W" and rows[4]["gpa_points"] is None
+
 
 class TestOcrRateLimiting:
     def test_rate_limiting_blocks_eleventh_call(self):

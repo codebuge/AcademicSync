@@ -39,6 +39,7 @@ class MarkBase(BaseModel):
 
 class MarkCreate(MarkBase):
     student_id: Optional[str] = None
+    status: Optional[str] = "verified"
 
 class MarkUpdate(BaseModel):
     course_name: Optional[str] = None

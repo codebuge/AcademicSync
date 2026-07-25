@@ -52,6 +52,41 @@ class TestParseTranscriptPdf:
         result = parse_transcript_pdf(b"This is not a PDF file at all.")
         assert result == []
 
+    def test_table_extraction_with_pdfplumber_mock(self, monkeypatch):
+        class MockPage:
+            def extract_text(self):
+                return "Semester 1\nSpring 2023"
+
+            def extract_tables(self):
+                return [[
+                    ["Course Code", "Course Title", "Obt. Marks", "Max Marks", "Cr. Hr", "Grade", "Grade Points"],
+                    ["CSC103", "Programming Fundamentals", "59", "100", "3", "C-", "1.66"],
+                    ["CSC104", "Object Oriented Programming(P)", "", "50", "1", "F", "0.00"],
+                    ["MATH101", "Calculus and Analytical Geometry", "85", "100", "3", "A", "4.00"],
+                    ["ENG101", "English Composition", "", "", "3", "", ""]  # Malformed row with missing grade
+                ]]
+
+        class MockPdf:
+            pages = [MockPage()]
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+
+        monkeypatch.setattr("pdfplumber.open", lambda *a, **kw: MockPdf())
+
+        result = parse_transcript_pdf(b"dummy_pdf_content")
+        assert len(result) == 1
+        sem = result[0]
+        assert "Semester 1" in sem["semester_name"]
+        assert "Spring 2023" in sem["semester_name"]
+        assert len(sem["courses"]) == 3
+        assert sem["courses"][0]["course_name"] == "CSC103 - Programming Fundamentals"
+        assert sem["courses"][0]["credit_hours"] == 3.0
+        assert sem["courses"][0]["grade"] == "C-"
+        assert sem["courses"][1]["course_name"] == "CSC104 - Object Oriented Programming(P)"
+        assert sem["courses"][1]["grade"] == "F"
+        assert len(sem["parse_warnings"]) == 1
+        assert "ENG101" in sem["parse_warnings"][0]
+
 
 class TestMapGradeToScore:
     def test_map_grade_to_score_custom_scale(self):

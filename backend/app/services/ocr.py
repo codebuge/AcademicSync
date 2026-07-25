@@ -320,7 +320,7 @@ def parse_grading_scale_table(image_bytes: bytes) -> Dict[str, Any]:
     sort_order = 0
 
     closed_range_regex = re.compile(
-        r"^\b(\d+(?:\.\d+)?)\s*[%-–to\s]+\s*(\d+(?:\.\d+)?)\s*%?\s+([A-F][+-]?|I|W|Frz|Freeze)\s+(\d+(?:\.\d+)?)$",
+        r"^\b(\d+(?:\.\d+)?)\s*(?:%|-|–|—|to|\s)+\s*(\d+(?:\.\d+)?)\s*%?\s+([A-F][+-]?|I|W|Frz|Freeze)\s+(\d+(?:\.\d+)?)$",
         re.IGNORECASE
     )
     above_range_regex = re.compile(
@@ -332,7 +332,7 @@ def parse_grading_scale_table(image_bytes: bytes) -> Dict[str, Any]:
         re.IGNORECASE
     )
     non_numeric_regex = re.compile(
-        r"^\b(I|W|Frz|Freeze)\b\s*[-–—]?\s*[-–—]?$",
+        r"\b(I|W|Frz|Freeze)\b",
         re.IGNORECASE
     )
 
@@ -385,7 +385,7 @@ def parse_grading_scale_table(image_bytes: bytes) -> Dict[str, Any]:
         m = non_numeric_regex.search(line)
         if m:
             rows.append({
-                "min_percent": 0.0,
+                "min_percent": None,
                 "max_percent": None,
                 "letter_grade": m.group(1).upper(),
                 "gpa_points": None,

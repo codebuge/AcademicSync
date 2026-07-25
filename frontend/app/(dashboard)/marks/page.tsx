@@ -13,7 +13,7 @@ import type { Mark, OcrExtractedMark, OcrResponse } from '@/types'
 
 const markSchema = z.object({
   course_name: z.string().min(2, 'Course name required'),
-  credit_hours: z.number().min(0.5).max(4),
+  credit_hours: z.number().min(0.5).max(6),
   score: z.number().min(0).max(100),
   semester: z.string().min(1, 'Semester required'),
   max_score: z.number().default(100),
@@ -105,6 +105,29 @@ export default function MarksPage() {
       setFormError('Network error occurred. Please try again.')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleDeleteMark = async (markId: string) => {
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const base = '/api'
+      const res = await fetch(`${base}/marks/${markId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (res.ok) {
+        setMarks(prev => prev.filter(m => m.id !== markId))
+        setSuccessMsg('Mark deleted successfully')
+        setTimeout(() => setSuccessMsg(null), 3000)
+      } else {
+        const err = await res.json().catch(() => ({}))
+        setFormError(err.detail || 'Failed to delete mark')
+      }
+    } catch {
+      setFormError('Failed to delete mark due to network error')
     }
   }
 
@@ -360,7 +383,7 @@ export default function MarksPage() {
                   <Loader2 size={24} className="animate-spin text-teal-400" />
                 </div>
               ) : (
-                <MarksTable marks={marks} />
+                <MarksTable marks={marks} onDeleteMark={handleDeleteMark} />
               )}
             </div>
           </div>
