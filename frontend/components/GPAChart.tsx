@@ -10,8 +10,8 @@ interface GPAChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="glass rounded-xl px-4 py-3 text-xs" style={{ border: '1px solid var(--border)' }}>
-      <p className="font-semibold mb-2" style={{ color: 'var(--foreground)' }}>{label}</p>
+    <div className="glass-panel rounded-xl px-4 py-3 text-xs" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+      <p className="font-semibold mb-2 text-white">{label}</p>
       {payload.map((entry: { name: string; value: number; color: string }) => (
         <p key={entry.name} style={{ color: entry.color }}>
           {entry.name}: <strong>{entry.value?.toFixed(2) ?? '—'}</strong>

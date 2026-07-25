@@ -36,8 +36,8 @@ export function MarksTable({ marks, onDeleteMark }: MarksTableProps) {
   if (marks.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 rounded-xl"
-        style={{ background: 'var(--muted)', border: '1px dashed var(--border)' }}>
-        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No marks yet — add your first course above</p>
+        style={{ background: 'rgba(15,23,42,0.5)', border: '1px dashed var(--border)' }}>
+        <p className="text-sm text-slate-400">No marks yet — add your first course above</p>
       </div>
     )
   }
@@ -58,17 +58,17 @@ export function MarksTable({ marks, onDeleteMark }: MarksTableProps) {
   return (
     <>
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto rounded-xl" style={{ border: '1px solid var(--border)' }}>
+      <div className="hidden md:block overflow-x-auto rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
         <table className="w-full text-sm">
-          <thead style={{ background: 'var(--muted)', borderBottom: '1px solid var(--border)' }}>
+          <thead style={{ background: 'rgba(15,23,42,0.5)', borderBottom: '1px solid var(--border)' }}>
             <tr>
               <HeaderCell label="Course" sortField="course_name" />
               <HeaderCell label="Semester" sortField="semester" />
               <HeaderCell label="Score %" sortField="score" />
               <HeaderCell label="Credits" sortField="credit_hours" />
-              <th className="text-left py-2.5 px-3 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Grade</th>
+              <th className="text-left py-2.5 px-3 text-xs font-semibold text-slate-400">Grade</th>
               <HeaderCell label="Status" sortField="status" />
-              <th className="text-right py-2.5 px-3 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Action</th>
+              <th className="text-right py-2.5 px-3 text-xs font-semibold text-slate-400">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -79,16 +79,16 @@ export function MarksTable({ marks, onDeleteMark }: MarksTableProps) {
                   className="transition-colors hover:bg-white/[0.02]"
                   style={{ borderBottom: i < sorted.length - 1 ? '1px solid var(--border)' : 'none' }}>
                   <td className="py-3 px-3">
-                    <p className="font-medium truncate max-w-[180px]" style={{ color: 'var(--foreground)' }}>{mark.course_name}</p>
-                    <p className="text-xs capitalize" style={{ color: 'var(--muted-foreground)' }}>{mark.source}</p>
+                    <p className="font-medium truncate max-w-[180px] text-white">{mark.course_name}</p>
+                    <p className="text-xs capitalize text-slate-400">{mark.source}</p>
                   </td>
-                  <td className="py-3 px-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.semester}</td>
+                  <td className="py-3 px-3 text-xs text-slate-400">{mark.semester}</td>
                   <td className="py-3 px-3">
                     <span className="font-semibold tabular-nums" style={{ color: scoreColor }}>{mark.score}%</span>
                   </td>
-                  <td className="py-3 px-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.credit_hours} cr</td>
+                  <td className="py-3 px-3 text-xs text-slate-400">{mark.credit_hours} cr</td>
                   <td className="py-3 px-3">
-                    <span className="font-medium text-xs" style={{ color: 'var(--foreground)' }}>{mark.letter_grade || '—'}</span>
+                    <span className="font-medium text-xs text-white">{mark.letter_grade || '—'}</span>
                   </td>
                   <td className="py-3 px-3">
                     <StatusBadge status={mark.status} />
@@ -116,11 +116,11 @@ export function MarksTable({ marks, onDeleteMark }: MarksTableProps) {
         {sorted.map((mark) => {
           const scoreColor = mark.score >= 80 ? '#2dd4bf' : mark.score >= 60 ? '#fbbf24' : '#f87171'
           return (
-            <div key={mark.id} className="glass rounded-xl p-4 border" style={{ borderColor: 'var(--border)' }}>
+            <div key={mark.id} className="glass-panel rounded-xl p-4 border" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
               <div className="flex justify-between items-start gap-2">
                 <div>
                   <p className="font-semibold text-sm text-white truncate max-w-[180px]">{mark.course_name}</p>
-                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{mark.semester} · {mark.credit_hours} cr</p>
+                  <p className="text-xs text-slate-400">{mark.semester} · {mark.credit_hours} cr</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={mark.status} />
@@ -135,10 +135,10 @@ export function MarksTable({ marks, onDeleteMark }: MarksTableProps) {
                   )}
                 </div>
               </div>
-              <div className="flex justify-between items-center mt-3 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-                <span className="text-[11px] capitalize" style={{ color: 'var(--muted-foreground)' }}>Source: {mark.source}</span>
+              <div className="flex justify-between items-center mt-3 pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+                <span className="text-[11px] capitalize text-slate-400">Source: {mark.source}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>Score:</span>
+                  <span className="text-[11px] text-slate-400">Score:</span>
                   <span className="font-bold text-sm" style={{ color: scoreColor }}>{mark.score}%</span>
                   {mark.letter_grade && (
                     <span className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] text-white font-semibold">{mark.letter_grade}</span>

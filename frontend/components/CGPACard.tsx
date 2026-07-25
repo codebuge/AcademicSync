@@ -29,10 +29,10 @@ export function CGPACard({ cgpa, totalCredits, currentSemester }: CGPACardProps)
       {/* Decorative circle */}
       <div
         className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-10"
-        style={{ background: cgpa >= 3.5 ? 'var(--primary)' : cgpa >= 2.5 ? 'hsl(38,92%,50%)' : 'hsl(0,84%,60%)' }}
+        style={{ background: cgpa >= 3.5 ? '#10b981' : cgpa >= 2.5 ? '#f59e0b' : '#ef4444' }}
       />
 
-      <p className="text-xs font-medium mb-2 relative" style={{ color: 'var(--muted-foreground)' }}>
+      <p className="text-xs font-medium mb-2 relative text-slate-400">
         Cumulative GPA
       </p>
 
@@ -41,7 +41,7 @@ export function CGPACard({ cgpa, totalCredits, currentSemester }: CGPACardProps)
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
         {cgpa.toFixed(2)}
-        <span className="text-base font-normal ml-1" style={{ color: 'var(--muted-foreground)' }}>/4.0</span>
+        <span className="text-base font-normal ml-1 text-slate-400">/4.0</span>
       </p>
 
       {/* Status label */}
@@ -50,16 +50,16 @@ export function CGPACard({ cgpa, totalCredits, currentSemester }: CGPACardProps)
           className="text-xs px-2 py-0.5 rounded-full font-medium"
           style={{
             background: cgpa >= 3.5 ? 'rgba(45,212,191,0.15)' : cgpa >= 2.5 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-            color: cgpa >= 3.5 ? 'var(--primary)' : cgpa >= 2.5 ? 'hsl(38,92%,60%)' : 'hsl(0,84%,65%)',
+            color: cgpa >= 3.5 ? '#10b981' : cgpa >= 2.5 ? '#f59e0b' : '#ef4444',
           }}
         >
           {cgpa >= 3.5 ? "Dean's List" : cgpa >= 2.5 ? 'Good Standing' : 'Needs Improvement'}
         </span>
       </div>
 
-      <div className="flex items-center gap-3 text-xs relative" style={{ color: 'var(--muted-foreground)' }}>
+      <div className="flex items-center gap-3 text-xs relative text-slate-400">
         <span>Sem {currentSemester}</span>
-        <span style={{ color: 'var(--border)' }}>·</span>
+        <span className="text-white/20">·</span>
         <span>{totalCredits.toFixed(1)} cr verified</span>
       </div>
     </div>

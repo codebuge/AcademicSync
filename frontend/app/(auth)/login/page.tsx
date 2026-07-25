@@ -63,27 +63,27 @@ export default function LoginPage() {
   return (
     <>
       <header className="mb-6 text-center">
-        <h2 className="text-2xl md:text-3xl font-semibold text-[#1a1c1b] tracking-tight mb-2">Welcome back</h2>
-        <p className="text-sm text-[#3f4944]">Log in to see your latest GPA</p>
+        <h2 className="text-2xl font-bold text-white tracking-tight mb-1">Welcome back</h2>
+        <p className="text-sm text-slate-400">Log in to view your GPA dashboard</p>
       </header>
 
       {registered && (
-        <div className="mb-4 p-3 rounded-lg text-sm flex gap-2.5 items-start bg-[#e2f3ee] border border-[#a0f3d4] text-[#00513e] animate-slide-down">
-          <CheckCircle size={16} className="shrink-0 mt-0.5" />
-          <span>Account created successfully! Sign in to continue.</span>
+        <div className="mb-5 p-3.5 neo-card-sm text-sm flex gap-3 items-center text-emerald-400 animate-slide-down">
+          <CheckCircle size={18} className="shrink-0" />
+          <span>Account created successfully! Please log in.</span>
         </div>
       )}
 
       {authError && (
-        <div className="mb-4 p-3 rounded-lg text-sm bg-[#ffdad6] border border-[#ffb4a4] text-[#ba1a1a] animate-slide-down">
+        <div className="mb-5 p-3.5 neo-card-sm text-sm text-rose-400 animate-slide-down">
           {authError}
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Email Field */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-[#3f4944] block" htmlFor="email">
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block" htmlFor="email">
             Email Address
           </label>
           <input
@@ -91,57 +91,53 @@ export default function LoginPage() {
             type="email"
             id="email"
             placeholder="student@university.edu"
-            className={`w-full h-12 px-4 bg-[#F1F1F1] rounded-lg text-sm transition-all duration-200 outline-none focus:bg-white focus:ring-1 focus:ring-[#005440] border ${
-              errors.email ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : 'border-transparent focus:border-[#005440]'
-            }`}
+            className="w-full h-12 px-4 neo-input text-sm"
           />
           {errors.email && (
-            <p className="text-xs text-[#ba1a1a] mt-1">{errors.email.message}</p>
+            <p className="text-xs text-rose-400 mt-1">{errors.email.message}</p>
           )}
         </div>
 
         {/* Password Field */}
-        <div className="space-y-1 relative">
-          <label className="text-sm font-medium text-[#3f4944] block" htmlFor="password">
-            Password
-          </label>
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block" htmlFor="password">
+              Password
+            </label>
+            <Link href="/forgot-password" className="text-xs text-emerald-400 hover:underline">
+              Forgot?
+            </Link>
+          </div>
           <div className="relative">
             <input
               {...register('password')}
               type={showPassword ? 'text' : 'password'}
               id="password"
               placeholder="••••••••"
-              className={`w-full h-12 px-4 pr-12 bg-[#F1F1F1] rounded-lg text-sm transition-all duration-200 outline-none focus:bg-white focus:ring-1 focus:ring-[#005440] border ${
-                errors.password ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : 'border-transparent focus:border-[#005440]'
-              }`}
+              className="w-full h-12 px-4 pr-12 neo-input text-sm"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3f4944] hover:text-[#005440] transition-colors focus:outline-none"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-emerald-400 transition-colors"
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
           {errors.password && (
-            <p className="text-xs text-[#ba1a1a] mt-1">{errors.password.message}</p>
+            <p className="text-xs text-rose-400 mt-1">{errors.password.message}</p>
           )}
-          <div className="flex justify-end pt-1">
-            <Link href="/forgot-password" className="text-sm font-medium text-[#005440] hover:underline">
-              Forgot password?
-            </Link>
-          </div>
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full h-12 bg-[#E8664A] hover:bg-[#D55A3F] text-white font-medium text-sm rounded-lg transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full h-12 neo-button-primary mt-2 flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isLoading ? (
             <>
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={18} className="animate-spin" />
               <span>Logging in...</span>
             </>
           ) : (
@@ -153,11 +149,11 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <footer className="mt-6 pt-6 border-t border-[#bec9c3]/30 text-center">
-        <p className="text-sm text-[#3f4944]">
+      <footer className="mt-8 pt-6 border-t border-slate-800 text-center">
+        <p className="text-sm text-slate-400">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-[#005440] font-semibold hover:underline">
-            Sign up
+          <Link href="/signup" className="text-emerald-400 font-semibold hover:underline ml-1">
+            Sign up free
           </Link>
         </p>
       </footer>

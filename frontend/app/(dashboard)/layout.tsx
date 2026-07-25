@@ -32,14 +32,13 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     <div className="flex flex-col h-full py-6 px-4">
       {/* Logo */}
       <div className="flex items-center gap-3 px-2 mb-8">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: 'linear-gradient(135deg, var(--primary), hsl(168,84%,28%))' }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-emerald-500 to-emerald-700">
           <GraduationCap size={20} color="white" />
         </div>
         <span className="font-bold text-lg gradient-text">AcademicSync</span>
         {onClose && (
           <button onClick={onClose} className="ml-auto p-1 rounded-lg hover:bg-white/5 transition-colors">
-            <X size={18} style={{ color: 'var(--muted-foreground)' }} />
+            <X size={18} className="text-slate-400" />
           </button>
         )}
       </div>
@@ -50,15 +49,14 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           const isActive = pathname === href
           return (
             <Link key={href} href={href} onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
-              style={{
-                background: isActive ? 'rgba(45,212,191,0.12)' : 'transparent',
-                color: isActive ? 'var(--primary)' : 'var(--muted-foreground)',
-                border: isActive ? '1px solid rgba(45,212,191,0.2)' : '1px solid transparent',
-              }}>
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group border ${
+                isActive
+                  ? 'bg-emerald-500/12 text-emerald-400 border-emerald-500/20'
+                  : 'text-slate-400 border-transparent hover:bg-white/5 hover:text-slate-200'
+              }`}>
               <Icon size={18} />
               <span>{label}</span>
-              {isActive && <ChevronRight size={14} className="ml-auto" style={{ color: 'var(--primary)' }} />}
+              {isActive && <ChevronRight size={14} className="ml-auto text-emerald-400" />}
             </Link>
           )
         })}
@@ -66,20 +64,18 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
       {/* User info */}
       {user && (
-        <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="mt-4 pt-4 border-t border-white/10">
           <div className="px-3 py-2 mb-2">
-            <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>{user.full_name || user.email}</p>
+            <p className="text-sm font-medium truncate text-white">{user.full_name || user.email}</p>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs px-2 py-0.5 rounded-full capitalize font-medium"
-                style={{ background: 'rgba(45,212,191,0.15)', color: 'var(--primary)' }}>
+              <span className="text-xs px-2 py-0.5 rounded-full capitalize font-medium bg-emerald-500/15 text-emerald-400">
                 {user.role}
               </span>
-              <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Sem {user.current_semester}</span>
+              <span className="text-xs text-slate-400">Sem {user.current_semester}</span>
             </div>
           </div>
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-red-500/10 group"
-            style={{ color: 'var(--muted-foreground)' }}>
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-red-500/10 group text-slate-400">
             <LogOut size={18} className="group-hover:text-red-400 transition-colors" />
             <span className="group-hover:text-red-400 transition-colors">Sign out</span>
           </button>
@@ -122,18 +118,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--background)' }}>
-        <div className="w-8 h-8 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'var(--muted)', borderTopColor: 'var(--primary)' }} />
+      <div className="min-h-screen flex items-center justify-center glass-portal-bg">
+        <div className="w-8 h-8 rounded-full border-2 animate-spin border-slate-700 border-t-emerald-400" />
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--background)' }}>
+    <div className="flex h-screen overflow-hidden glass-portal-bg">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 shrink-0 glass"
-        style={{ borderRight: '1px solid var(--border)' }}>
+      <aside className="hidden lg:flex flex-col w-64 shrink-0 glass-sidebar">
         <SidebarContent />
       </aside>
 
@@ -141,8 +135,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-72 glass animate-slide-up"
-            style={{ borderRight: '1px solid var(--border)' }}>
+          <div className="absolute left-0 top-0 h-full w-72 glass-sidebar animate-slide-up">
             <SidebarContent onClose={() => setMobileOpen(false)} />
           </div>
         </div>
@@ -151,25 +144,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="glass h-14 flex items-center gap-4 px-4 lg:px-6 shrink-0"
-          style={{ borderBottom: '1px solid var(--border)' }}>
+        <header className="glass-header h-14 flex items-center gap-4 px-4 lg:px-6 shrink-0">
           <button className="lg:hidden p-2 rounded-xl hover:bg-white/5 transition-colors"
             onClick={() => setMobileOpen(true)}>
-            <Menu size={20} style={{ color: 'var(--foreground)' }} />
+            <Menu size={20} className="text-white" />
           </button>
-          <span className="font-semibold text-sm lg:hidden" style={{ color: 'var(--foreground)' }}>
+          <span className="font-semibold text-sm lg:hidden text-white">
             {pageTitle}
           </span>
           <div className="flex-1" />
 
           {user && (
             <div className="flex items-center gap-3">
-              <span className="text-sm hidden sm:block" style={{ color: 'var(--muted-foreground)' }}>
+              <span className="text-sm hidden sm:block text-slate-400">
                 {user.full_name || user.email}
               </span>
               <Link href="/settings">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold cursor-pointer hover:opacity-80 transition-opacity"
-                  style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white' }}
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold cursor-pointer hover:opacity-80 transition-opacity bg-gradient-to-br from-emerald-400 to-purple-500 text-white"
                   title="Go to Settings">
                   {(user.full_name || user.email || 'U')[0].toUpperCase()}
                 </div>
@@ -180,8 +171,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Semester guard banner */}
         {semesterGuardVisible && (
-          <div className="flex items-center gap-3 px-4 py-2.5 text-sm animate-slide-down"
-            style={{ background: 'rgba(45,212,191,0.1)', borderBottom: '1px solid rgba(45,212,191,0.2)', color: 'var(--primary)' }}>
+          <div className="flex items-center gap-3 px-4 py-2.5 text-sm animate-slide-down bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-400">
             <FileText size={16} />
             <span className="flex-1">Transcript upload unlocks in Semester 2. Complete your first semester to enable this feature.</span>
             <button onClick={hideSemesterGuard} className="hover:opacity-70 transition-opacity">
@@ -198,3 +188,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   )
 }
+

@@ -99,27 +99,27 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Settings</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="text-sm mt-1 text-slate-400">
           Manage your academic profile and account security
         </p>
       </div>
 
       {/* ── Personal Profile ── */}
-      <div className="glass rounded-2xl p-6 space-y-5">
+      <div className="glass-panel rounded-2xl p-6 space-y-5">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl" style={{ background: 'rgba(45,212,191,0.12)', border: '1px solid rgba(45,212,191,0.2)' }}>
-              <User size={16} style={{ color: 'var(--primary)' }} />
+              <User size={16} className="text-emerald-400" />
             </div>
-            <h2 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>Personal Profile</h2>
+            <h2 className="text-base font-semibold text-white">Personal Profile</h2>
           </div>
           <button
             id="save-profile-btn"
             onClick={handleSaveProfile}
             disabled={profileSaving}
             className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-60 hover-lift"
-            style={{ background: 'linear-gradient(135deg, var(--primary), hsl(168,84%,28%))', color: 'white', boxShadow: '0 4px 14px var(--teal-glow)' }}
+            style={{ background: 'linear-gradient(135deg, var(--primary), hsl(168,84%,28%))', color: 'white', boxShadow: '0 4px 14px rgba(45,212,191,0.15)' }}
           >
             {profileSaving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
             Save Changes
@@ -139,7 +139,7 @@ export default function SettingsPage() {
           {/* Fields */}
           <div className="flex-1 grid grid-cols-1 gap-4">
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--muted-foreground)' }}>
+              <label className="block text-xs font-medium mb-1.5 text-slate-400">
                 Full Name
               </label>
               <input
@@ -149,11 +149,11 @@ export default function SettingsPage() {
                 onChange={e => setFullName(e.target.value)}
                 placeholder="Your full name"
                 className="w-full px-3 py-2.5 rounded-xl text-sm"
-                style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }}
+                style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--muted-foreground)' }}>
+              <label className="block text-xs font-medium mb-1.5 text-slate-400">
                 Email
               </label>
               <input
@@ -161,21 +161,21 @@ export default function SettingsPage() {
                 value={user?.email ?? ''}
                 readOnly
                 className="w-full px-3 py-2.5 rounded-xl text-sm cursor-not-allowed"
-                style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--muted-foreground)', outline: 'none', opacity: 0.7 }}
+                style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', outline: 'none', opacity: 0.7 }}
               />
             </div>
 
             {/* Current Semester info */}
             <div className="flex items-center gap-3 px-3 py-2 rounded-xl"
-              style={{ background: 'var(--muted)', border: '1px solid var(--border)' }}>
-              <GraduationCap size={15} style={{ color: 'var(--primary)' }} />
-              <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                Current Semester: <strong style={{ color: 'var(--foreground)' }}>
+              style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <GraduationCap size={15} className="text-emerald-400" />
+              <span className="text-xs text-slate-400">
+                Current Semester: <strong className="text-white">
                   {user?.current_semester ?? 1}
                 </strong>
               </span>
               <span className="ml-auto text-xs px-2 py-0.5 rounded-full capitalize font-medium"
-                style={{ background: 'rgba(45,212,191,0.12)', color: 'var(--primary)' }}>
+                style={{ background: 'rgba(45,212,191,0.12)', color: '#10b981' }}>
                 {user?.role ?? 'student'}
               </span>
             </div>
@@ -197,17 +197,17 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Account Security ── */}
-      <div className="glass rounded-2xl p-6 space-y-5">
+      <div className="glass-panel rounded-2xl p-6 space-y-5">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl" style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.2)' }}>
             <Lock size={16} style={{ color: '#a78bfa' }} />
           </div>
-          <h2 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>Account Security</h2>
+          <h2 className="text-base font-semibold text-white">Account Security</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--muted-foreground)' }}>
+            <label className="block text-xs font-medium mb-1.5 text-slate-400">
               New Password
             </label>
             <input
@@ -217,11 +217,11 @@ export default function SettingsPage() {
               onChange={e => setNewPassword(e.target.value)}
               placeholder="••••••••"
               className="w-full px-3 py-2.5 rounded-xl text-sm"
-              style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }}
+              style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--muted-foreground)' }}>
+            <label className="block text-xs font-medium mb-1.5 text-slate-400">
               Confirm New Password
             </label>
             <input
@@ -231,7 +231,7 @@ export default function SettingsPage() {
               onChange={e => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
               className="w-full px-3 py-2.5 rounded-xl text-sm"
-              style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }}
+              style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }}
             />
           </div>
         </div>
@@ -242,7 +242,7 @@ export default function SettingsPage() {
             onClick={handleUpdatePassword}
             disabled={passwordSaving}
             className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-60 hover-lift"
-            style={{ border: '2px solid var(--primary)', color: 'var(--primary)', background: 'transparent' }}
+            style={{ border: '2px solid var(--primary)', color: '#10b981', background: 'transparent' }}
           >
             {passwordSaving ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />}
             Update Password
@@ -264,8 +264,8 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Quick Info ── */}
-      <div className="glass rounded-2xl p-5">
-        <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--foreground)' }}>Account Info</h2>
+      <div className="glass-panel rounded-2xl p-5">
+        <h2 className="text-sm font-semibold mb-3 text-white">Account Info</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             { label: 'Role', value: user?.role ?? '—' },
@@ -273,9 +273,9 @@ export default function SettingsPage() {
             { label: 'Email', value: user?.email ?? '—' },
           ].map(({ label, value }) => (
             <div key={label} className="px-4 py-3 rounded-xl"
-              style={{ background: 'var(--muted)', border: '1px solid var(--border)' }}>
-              <p className="text-xs mb-1" style={{ color: 'var(--muted-foreground)' }}>{label}</p>
-              <p className="text-sm font-medium capitalize truncate" style={{ color: 'var(--foreground)' }}>{value}</p>
+              style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <p className="text-xs mb-1 text-slate-400">{label}</p>
+              <p className="text-sm font-medium capitalize truncate text-white">{value}</p>
             </div>
           ))}
         </div>

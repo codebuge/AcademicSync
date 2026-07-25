@@ -168,31 +168,32 @@ export default function TryCalculatorPage() {
   )
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--background)' }}>
+    <div className="min-h-screen pb-24 bg-[#131a26] text-slate-100">
       <Navbar />
 
       <main className="pt-28 px-4 max-w-3xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border border-white/10" style={{ color: 'var(--primary)' }}>
-            No sign up required
+          <span className="neo-badge inline-flex items-center px-4 py-1.5 text-xs font-semibold text-emerald-400">
+            <Sparkles size={14} className="mr-1.5" />
+            No sign-up required
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-            Calculate your GPA instantly
+            Calculate your GPA <span className="gradient-text">instantly</span>
           </h1>
-          <p className="text-sm max-w-xl mx-auto" style={{ color: 'var(--muted-foreground)' }}>
-            Input your courses below to instantly calculate your weighted GPA. Signup anytime to lock in your score history.
+          <p className="text-sm max-w-xl mx-auto text-slate-400">
+            Input your courses below to instantly calculate your weighted GPA. Sign up anytime to lock in your score history.
           </p>
         </div>
 
         {/* Form Container */}
-        <div className="glass rounded-2xl p-6 border-white/5 space-y-6">
+        <div className="neo-card p-6 space-y-6">
           {/* Scale selection */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider mb-2.5" style={{ color: 'var(--muted-foreground)' }}>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2.5 text-slate-400">
               Grading Scale System
             </label>
-            <div className="grid grid-cols-3 p-1 rounded-xl" style={{ background: 'var(--muted)', border: '1px solid var(--border)' }}>
+            <div className="grid grid-cols-3 p-1.5 neo-card-sm">
               {[
                 { id: '4.0', label: '4.0 Scale' },
                 { id: '5.0', label: '5.0 Scale' },
@@ -202,11 +203,11 @@ export default function TryCalculatorPage() {
                   key={opt.id}
                   type="button"
                   onClick={() => setScale(opt.id as any)}
-                  className="py-2 rounded-lg text-xs font-semibold transition-all duration-200"
-                  style={{
-                    background: scale === opt.id ? 'var(--primary)' : 'transparent',
-                    color: scale === opt.id ? 'white' : 'var(--muted-foreground)'
-                  }}>
+                  className={`py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                    scale === opt.id
+                      ? 'neo-button-primary'
+                      : 'text-slate-400 hover:text-white'
+                  }`}>
                   {opt.label}
                 </button>
               ))}
@@ -215,7 +216,7 @@ export default function TryCalculatorPage() {
 
           {/* Courses table / list header */}
           <div className="space-y-4">
-            <div className="hidden md:grid grid-cols-12 gap-3 text-xs font-semibold uppercase tracking-wider pb-2 border-b" style={{ color: 'var(--muted-foreground)', borderColor: 'var(--border)' }}>
+            <div className="hidden md:grid grid-cols-12 gap-3 text-xs font-semibold uppercase tracking-wider pb-2 border-b border-slate-700/50 text-slate-400">
               <div className="col-span-6">Course Name</div>
               <div className="col-span-3">Credits</div>
               <div className="col-span-2">Score (%)</div>
@@ -240,18 +241,17 @@ export default function TryCalculatorPage() {
           </div>
 
           {/* Table Actions */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2 border-t border-slate-700/50">
             <button
               type="button"
               onClick={handleAddRow}
               disabled={courses.length >= 20}
-              className="flex items-center gap-1.5 text-xs font-semibold hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ color: 'var(--primary)' }}>
+              className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <Plus size={16} /> Add Course Row ({courses.length}/20)
             </button>
 
             {apiError && (
-              <div className="flex items-center gap-2 p-2.5 rounded-lg text-xs" style={{ background: 'rgba(239,68,68,0.1)', color: 'hsl(0,84%,70%)', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <div className="neo-card-sm flex items-center gap-2 p-2.5 text-xs text-red-400 border border-red-500/20">
                 <AlertCircle size={14} className="shrink-0" />
                 <span>{apiError}</span>
               </div>
@@ -261,12 +261,7 @@ export default function TryCalculatorPage() {
               type="button"
               onClick={handleCalculate}
               disabled={loading || !hasAtLeastOneFilledRow}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 py-2.5 px-6 rounded-lg font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                background: 'linear-gradient(135deg, var(--primary), hsl(168,84%,28%))',
-                color: 'white',
-                boxShadow: (loading || !hasAtLeastOneFilledRow) ? 'none' : '0 4px 12px var(--teal-glow)'
-              }}>
+              className="w-full sm:w-auto neo-button-primary flex items-center justify-center gap-2 py-3 px-8 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
               {loading ? 'Calculating...' : 'Calculate GPA'}
             </button>

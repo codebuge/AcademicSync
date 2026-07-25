@@ -102,19 +102,19 @@ export default function SignupPage() {
   return (
     <>
       <header className="text-center mb-6">
-        <h1 className="text-2xl md:text-3xl font-semibold text-[#1a1c1b] tracking-tight mb-2">Create your account</h1>
-        <p className="text-sm text-[#3f4944]">Track your GPA and CGPA automatically</p>
+        <h1 className="text-2xl font-bold text-white tracking-tight mb-1">Create your account</h1>
+        <p className="text-sm text-slate-400">Track your GPA and CGPA automatically</p>
       </header>
 
-      {/* Dismissible Amber Alert */}
+      {/* Dismissible Alert */}
       {hasDraft && (
-        <div className="bg-[#FFF8E1] border border-[#FFECB3] rounded-lg p-3 flex items-start gap-3 mb-6 transition-all duration-300 animate-slide-down">
-          <Info className="text-[#FFA000] shrink-0 mt-0.5" size={20} />
-          <p className="text-sm text-[#5D4037] flex-1">We saved your GPA calculation — sign up to keep it</p>
+        <div className="neo-card-sm p-3.5 flex items-start gap-3 mb-5 text-amber-400 animate-slide-down">
+          <Info className="shrink-0 mt-0.5 text-amber-400" size={18} />
+          <p className="text-xs flex-1 text-slate-300">We saved your GPA calculation — sign up to keep it!</p>
           <button 
             type="button" 
             onClick={handleDismissDraft} 
-            className="text-[#5D4037] hover:bg-[#FFECB3] rounded-full p-1 transition-colors shrink-0"
+            className="text-slate-400 hover:text-white p-1"
           >
             <X size={16} />
           </button>
@@ -122,15 +122,15 @@ export default function SignupPage() {
       )}
 
       {authError && (
-        <div className="mb-4 p-3 rounded-lg text-sm bg-[#ffdad6] border border-[#ffb4a4] text-[#ba1a1a] animate-slide-down">
+        <div className="mb-5 p-3.5 neo-card-sm text-sm text-rose-400 animate-slide-down">
           {authError}
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Full Name */}
         <div className="space-y-1">
-          <label className="text-sm font-medium text-[#3f4944] block" htmlFor="full_name">
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block" htmlFor="full_name">
             Full Name
           </label>
           <input
@@ -138,18 +138,16 @@ export default function SignupPage() {
             type="text"
             id="full_name"
             placeholder="John Doe"
-            className={`w-full h-12 px-4 bg-[#F1F1F1] rounded-lg text-sm transition-all duration-200 outline-none focus:bg-white focus:ring-1 focus:ring-[#005440] border ${
-              errors.full_name ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : 'border-transparent focus:border-[#005440]'
-            }`}
+            className="w-full h-11 px-4 neo-input text-sm"
           />
           {errors.full_name && (
-            <p className="text-xs text-[#ba1a1a] mt-1">{errors.full_name.message}</p>
+            <p className="text-xs text-rose-400 mt-1">{errors.full_name.message}</p>
           )}
         </div>
 
         {/* Email Address */}
         <div className="space-y-1">
-          <label className="text-sm font-medium text-[#3f4944] block" htmlFor="email">
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block" htmlFor="email">
             Email Address
           </label>
           <input
@@ -157,18 +155,16 @@ export default function SignupPage() {
             type="email"
             id="email"
             placeholder="you@university.edu"
-            className={`w-full h-12 px-4 bg-[#F1F1F1] rounded-lg text-sm transition-all duration-200 outline-none focus:bg-white focus:ring-1 focus:ring-[#005440] border ${
-              errors.email ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : 'border-transparent focus:border-[#005440]'
-            }`}
+            className="w-full h-11 px-4 neo-input text-sm"
           />
           {errors.email && (
-            <p className="text-xs text-[#ba1a1a] mt-1">{errors.email.message}</p>
+            <p className="text-xs text-rose-400 mt-1">{errors.email.message}</p>
           )}
         </div>
 
         {/* Password */}
         <div className="space-y-1">
-          <label className="text-sm font-medium text-[#3f4944] block" htmlFor="password">
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block" htmlFor="password">
             Password
           </label>
           <input
@@ -176,36 +172,32 @@ export default function SignupPage() {
             type="password"
             id="password"
             placeholder="••••••••"
-            className={`w-full h-12 px-4 bg-[#F1F1F1] rounded-lg text-sm transition-all duration-200 outline-none focus:bg-white focus:ring-1 focus:ring-[#005440] border ${
-              errors.password ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : 'border-transparent focus:border-[#005440]'
-            }`}
+            className="w-full h-11 px-4 neo-input text-sm"
           />
           {errors.password && (
-            <p className="text-xs text-[#ba1a1a] mt-1">{errors.password.message}</p>
+            <p className="text-xs text-rose-400 mt-1">{errors.password.message}</p>
           )}
         </div>
 
         {/* Divider */}
         <div className="relative py-2 flex items-center">
-          <div className="flex-grow border-t border-[#bec9c3]/50"></div>
-          <span className="flex-shrink mx-4 text-xs font-semibold text-[#6f7a74] uppercase tracking-wider">
-            Grading scale verification
+          <div className="flex-grow border-t border-slate-800"></div>
+          <span className="flex-shrink mx-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            Grading Scale Setup
           </span>
-          <div className="flex-grow border-t border-[#bec9c3]/50"></div>
+          <div className="flex-grow border-t border-slate-800"></div>
         </div>
 
         {/* Verification Row */}
-        <div className="flex gap-4 items-end">
+        <div className="flex gap-3 items-end">
           {/* Dropzone */}
           <div 
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFileChange(f) }}
             onClick={() => fileRef.current?.click()}
-            className={`flex-[2] h-28 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer p-2 text-center group transition-all ${
-              isDragging 
-                ? 'border-[#005440] bg-[#e2f3ee]' 
-                : 'border-[#bec9c3] bg-[#F9F9F7] hover:border-[#005440] hover:bg-white'
+            className={`flex-[2] h-24 neo-card-sm flex flex-col items-center justify-center cursor-pointer p-2 text-center group transition-all ${
+              isDragging ? 'border-emerald-500 bg-emerald-950/20' : 'hover:border-emerald-500/50'
             }`}
           >
             <input 
@@ -217,19 +209,19 @@ export default function SignupPage() {
             />
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="Grading scale preview" className="w-full h-full object-cover rounded-md" />
+              <img src={preview} alt="Grading scale preview" className="w-full h-full object-cover rounded-lg" />
             ) : (
               <>
-                <ImageIcon size={20} className="text-[#6f7a74] group-hover:text-[#005440] transition-colors mb-1" />
-                <p className="text-xs text-[#1a1c1b] font-semibold">Upload grading scale</p>
-                <p className="text-[10px] leading-tight text-[#3f4944] mt-1">PNG, JPG up to 5MB</p>
+                <ImageIcon size={20} className="text-slate-400 group-hover:text-emerald-400 transition-colors mb-1" />
+                <p className="text-xs text-slate-200 font-semibold">Upload scale photo</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">PNG, JPG up to 5MB</p>
               </>
             )}
           </div>
 
           {/* Current Semester */}
           <div className="flex-1 space-y-1">
-            <label className="text-xs font-semibold text-[#3f4944] block" htmlFor="current_semester">
+            <label className="text-xs font-semibold text-slate-300 block" htmlFor="current_semester">
               Semester
             </label>
             <input
@@ -238,35 +230,31 @@ export default function SignupPage() {
               id="current_semester"
               min="1"
               max="12"
-              className="w-full h-20 bg-[#F1F1F1] border-transparent rounded-lg px-4 text-3xl font-bold text-center focus:bg-white focus:ring-1 focus:ring-[#005440] focus:border-[#005440] outline-none"
+              className="w-full h-24 neo-input text-2xl font-bold text-center text-emerald-400"
             />
           </div>
         </div>
 
         {gradingFile && (
-          <p className="text-xs text-[#005440] font-semibold">Selected file: {gradingFile.name}</p>
+          <p className="text-xs text-emerald-400 font-medium">Attached: {gradingFile.name}</p>
         )}
 
         {/* OCR Error Panels */}
         {ocrError === 'GRADING_SCALE_LOW_CONFIDENCE' && (
-          <div className="rounded-xl p-4 bg-[#FFF8E1] border border-[#FFECB3] text-[#5D4037] animate-slide-down">
+          <div className="rounded-xl p-4 neo-card-sm text-amber-300 animate-slide-down">
             <div className="flex gap-3">
-              <TriangleAlert size={20} className="shrink-0 mt-0.5 text-[#FFA000]" />
+              <TriangleAlert size={20} className="shrink-0 mt-0.5 text-amber-400" />
               <div className="flex-1">
-                <p className="text-sm font-semibold mb-1">Photo too blurry or unclear</p>
-                <p className="text-xs mb-3 text-[#795548]">
-                  Try better lighting and make sure the table isn&apos;t tilted or blurry. Hold the camera steady and shoot straight-on.
+                <p className="text-sm font-semibold mb-1">Image unclear or blurry</p>
+                <p className="text-xs mb-3 text-slate-300">
+                  Ensure lighting is bright and table is upright.
                 </p>
-                <p className="text-xs font-semibold mb-2 text-[#795548]">Example of a good photo:</p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/grading_scale_example.png" alt="Example grading scale photo"
-                  className="w-full rounded-lg object-cover" style={{ maxHeight: '120px', border: '1px solid #FFECB3' }} />
                 <button 
                   type="button" 
                   onClick={() => { setOcrError(null); setGradingFile(null); setPreview(null) }}
-                  className="mt-3 text-xs px-3 py-1.5 rounded-lg font-semibold bg-[#FFE082] hover:bg-[#FFD54F] text-[#5D4037] border border-[#FFD54F] transition-all"
+                  className="neo-button px-3 py-1.5 text-xs text-amber-300 font-semibold"
                 >
-                  Try again with a clearer photo
+                  Try again
                 </button>
               </div>
             </div>
@@ -274,21 +262,18 @@ export default function SignupPage() {
         )}
 
         {ocrError === 'GRADING_SCALE_MALFORMED' && (
-          <div className="rounded-xl p-4 bg-[#ffdad6] border border-[#ffb4a4] text-[#ba1a1a] animate-slide-down">
+          <div className="rounded-xl p-4 neo-card-sm text-rose-300 animate-slide-down">
             <div className="flex gap-3">
-              <XCircle size={20} className="shrink-0 mt-0.5 text-[#ba1a1a]" />
+              <XCircle size={20} className="shrink-0 mt-0.5 text-rose-400" />
               <div className="flex-1">
                 <p className="text-sm font-semibold mb-1">Grading table not found</p>
-                <p className="text-xs mb-3 text-[#ba1a1a]/80">
-                  We couldn&apos;t find a grading table in that image. Please upload a clear photo of your university&apos;s grading scale table — not a transcript, syllabus, or other document.
-                </p>
-                <p className="text-xs mb-2 text-[#ba1a1a]/80">
-                  The table should show: <strong>percentage ranges → letter grades → GPA points</strong>
+                <p className="text-xs mb-3 text-slate-300">
+                  Please upload a clear screenshot of your university grading scale table.
                 </p>
                 <button 
                   type="button" 
                   onClick={() => { setOcrError(null); setGradingFile(null); setPreview(null) }}
-                  className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-[#ffb4a4] hover:bg-[#ff8a80] text-[#ba1a1a] border border-[#ff8a80] transition-all"
+                  className="neo-button px-3 py-1.5 text-xs text-rose-300 font-semibold"
                 >
                   Upload correct image
                 </button>
@@ -301,11 +286,11 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full h-14 bg-[#a83820] hover:bg-[#87200a] text-white font-medium text-sm rounded-lg shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full h-12 neo-button-primary mt-3 flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isLoading ? (
             <>
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={18} className="animate-spin" />
               <span>Creating account...</span>
             </>
           ) : (
@@ -318,10 +303,10 @@ export default function SignupPage() {
       </form>
 
       {/* Footer */}
-      <footer className="mt-6 text-center">
-        <p className="text-sm text-[#3f4944]">
+      <footer className="mt-6 pt-5 border-t border-slate-800 text-center">
+        <p className="text-sm text-slate-400">
           Already have an account?{' '}
-          <Link href="/login" className="text-[#005440] font-semibold hover:underline">
+          <Link href="/login" className="text-emerald-400 font-semibold hover:underline ml-1">
             Log in
           </Link>
         </p>

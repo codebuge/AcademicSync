@@ -56,8 +56,10 @@ async function proxyRequest(request: NextRequest) {
   }
 
   // Forward content-type for non-GET requests
+  // NOTE: Do NOT set Content-Type for multipart/form-data — the browser-set boundary
+  // is embedded in the raw body already; re-setting the header here would mismatch it.
   const contentType = request.headers.get('content-type')
-  if (contentType) {
+  if (contentType && !contentType.includes('multipart/form-data')) {
     headers['Content-Type'] = contentType
   }
 
@@ -75,12 +77,13 @@ async function proxyRequest(request: NextRequest) {
 
   // Forward body for non-GET/HEAD requests
   if (request.method !== 'GET' && request.method !== 'HEAD') {
-    // For multipart/form-data, forward the raw body and let the browser-set
-    // content-type with boundary pass through
+    // For multipart/form-data: forward raw bytes. Content-Type header is intentionally
+    // NOT set above, so the backend receives the original Content-Type with correct boundary.
     if (contentType?.includes('multipart/form-data')) {
       fetchOptions.body = await request.arrayBuffer()
-      // Remove content-type so fetch can set it with proper boundary
-      // Actually we need to keep it since we're forwarding the exact boundary
+      // Re-apply the original Content-Type (with boundary) directly on fetchOptions.headers
+      // so the backend can parse the multipart body correctly
+      ;(fetchOptions.headers as Record<string, string>)['Content-Type'] = contentType
     } else {
       fetchOptions.body = await request.arrayBuffer()
     }

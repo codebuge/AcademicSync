@@ -11,14 +11,11 @@ interface StatCardProps {
   accentColor?: string
 }
 
-export function StatCard({ title, value, subtitle, icon: Icon, colorClass = '', accentColor = 'var(--primary)' }: StatCardProps) {
+export function StatCard({ title, value, subtitle, icon: Icon, colorClass = '', accentColor = '#10b981' }: StatCardProps) {
   return (
-    <div
-      className="glass rounded-2xl p-5 hover-lift transition-all duration-200"
-      style={{ border: '1px solid var(--border)' }}
-    >
+    <div className="glass-card rounded-2xl p-5 hover-lift transition-all duration-200">
       <div className="flex items-start justify-between mb-3">
-        <p className="text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>{title}</p>
+        <p className="text-xs font-medium text-slate-400">{title}</p>
         <div
           className="p-2 rounded-xl"
           style={{ background: `${accentColor}18` }}
@@ -26,12 +23,13 @@ export function StatCard({ title, value, subtitle, icon: Icon, colorClass = '', 
           <Icon size={16} style={{ color: accentColor }} />
         </div>
       </div>
-      <p className={`text-2xl font-bold tabular-nums ${colorClass}`} style={{ color: colorClass ? undefined : 'var(--foreground)' }}>
+      <p className={`text-2xl font-bold tabular-nums ${colorClass}`} style={{ color: colorClass ? undefined : 'white' }}>
         {value}
       </p>
       {subtitle && (
-        <p className="text-xs mt-1.5" style={{ color: 'var(--muted-foreground)' }}>{subtitle}</p>
+        <p className="text-xs mt-1.5 text-slate-400">{subtitle}</p>
       )}
     </div>
   )
 }
+

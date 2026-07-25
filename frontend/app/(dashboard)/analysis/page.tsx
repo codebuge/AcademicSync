@@ -26,8 +26,8 @@ const COLORS = ['#2dd4bf', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981', '#3b82f6'
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="glass rounded-xl px-4 py-3 text-xs" style={{ border: '1px solid var(--border)' }}>
-      <p className="font-semibold mb-2" style={{ color: 'var(--foreground)' }}>{label}</p>
+    <div className="glass-panel rounded-xl px-4 py-3 text-xs" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+      <p className="font-semibold mb-2 text-white">{label}</p>
       {payload.map((entry: { name: string; value: number; color: string }) => (
         <p key={entry.name} style={{ color: entry.color }}>
           {entry.name}: <strong>{typeof entry.value === 'number' ? entry.value.toFixed(2) : entry.value}</strong>
@@ -114,8 +114,8 @@ export default function AnalysisPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Performance Analysis</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+        <h1 className="text-2xl font-bold text-white">Performance Analysis</h1>
+        <p className="text-sm mt-1 text-slate-400">
           CGPA: <strong className={getGpaColor(data?.cgpa ?? 0)}>{(data?.cgpa ?? 0).toFixed(2)}</strong>
           {' · '}{data?.total_courses_count ?? 0} total courses
         </p>
@@ -127,17 +127,17 @@ export default function AnalysisPage() {
         <div className="lg:col-span-8 glass rounded-2xl p-5 flex flex-col justify-between" style={{ minHeight: '380px' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <TrendingUp size={16} style={{ color: 'var(--primary)' }} />
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>CGPA Trend</h2>
+              <TrendingUp size={16} className="text-emerald-400" />
+              <h2 className="text-sm font-semibold text-white">CGPA Trend</h2>
             </div>
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--primary)' }}></span>
-                <span style={{ color: 'var(--muted-foreground)' }}>Your CGPA</span>
+                <span className="text-slate-400">Your CGPA</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-0.5" style={{ borderBottom: '2px dashed rgba(45,212,191,0.5)' }}></span>
-                <span style={{ color: 'var(--muted-foreground)' }}>Dean&apos;s List (3.5)</span>
+                <span className="text-slate-400">Dean&apos;s List (3.5)</span>
               </div>
             </div>
           </div>
@@ -168,35 +168,35 @@ export default function AnalysisPage() {
             </div>
           ) : (
             <div className="flex items-center justify-center flex-1 h-48 rounded-xl"
-              style={{ background: 'var(--muted)', border: '1px dashed var(--border)' }}>
-              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No semester data yet</p>
+              style={{ background: 'rgba(15,23,42,0.5)', border: '1px dashed var(--border)' }}>
+              <p className="text-sm text-slate-400">No semester data yet</p>
             </div>
           )}
         </div>
 
         {/* Projection Widget */}
-        <div className="lg:col-span-4 glass rounded-2xl p-5 flex flex-col justify-between border" style={{ borderColor: 'var(--border)', minHeight: '380px' }}>
+        <div className="lg:col-span-4 glass rounded-2xl p-5 flex flex-col justify-between border" style={{ borderColor: 'rgba(255,255,255,0.1)', minHeight: '380px' }}>
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Target size={16} style={{ color: 'var(--primary)' }} />
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Projection Tool</h2>
+              <Target size={16} className="text-emerald-400" />
+              <h2 className="text-sm font-semibold text-white">Projection Tool</h2>
             </div>
-            <p className="text-xs mb-4" style={{ color: 'var(--muted-foreground)' }}>
+            <p className="text-xs mb-4 text-slate-400">
               Calculate effort needed to reach your academic goals.
             </p>
             <form onSubmit={handleSubmit(onProject)} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--muted-foreground)' }}>Target CGPA</label>
+                  <label className="block text-[11px] font-semibold mb-1 text-slate-400">Target CGPA</label>
                   <input {...register('target', { valueAsNumber: true })} type="number" step="0.01" min="0" max="4"
                     className="w-full px-3 py-2 rounded-xl text-sm"
-                    style={{ background: 'var(--muted)', border: errors.target ? '1px solid rgba(239,68,68,0.5)' : '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }} />
+                    style={{ background: 'rgba(15,23,42,0.5)', border: errors.target ? '1px solid rgba(239,68,68,0.5)' : '1px solid var(--border)', color: 'white', outline: 'none' }} />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--muted-foreground)' }}>Remaining Sems</label>
+                  <label className="block text-[11px] font-semibold mb-1 text-slate-400">Remaining Sems</label>
                   <input {...register('remaining', { valueAsNumber: true })} type="number" min="1" max="12"
                     className="w-full px-3 py-2 rounded-xl text-sm"
-                    style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }} />
+                    style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }} />
                 </div>
               </div>
               <button type="submit" disabled={projecting}
@@ -216,7 +216,7 @@ export default function AnalysisPage() {
               }}>
               <div className="flex items-start gap-3">
                 {projection.achievable
-                  ? <TrendingUp size={16} className="mt-0.5" style={{ color: 'var(--primary)' }} />
+                  ? <TrendingUp size={16} className="mt-0.5 text-emerald-400" />
                   : <AlertCircle size={16} className="mt-0.5" style={{ color: 'hsl(0,84%,60%)' }} />
                 }
                 <div>
@@ -224,7 +224,7 @@ export default function AnalysisPage() {
                     style={{ color: projection.achievable ? 'var(--primary)' : 'hsl(0,84%,70%)' }}>
                     {projection.achievable ? '✓ Achievable Goal' : '⚠ Very Challenging'}
                   </p>
-                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  <p className="text-xs text-slate-400">
                     You need a <strong style={{ color: projection.achievable ? 'var(--primary)' : 'hsl(0,84%,70%)' }}>{projection.required_gpa.toFixed(2)} GPA</strong> per semester.
                   </p>
                 </div>
@@ -237,15 +237,15 @@ export default function AnalysisPage() {
       {/* Bento Grid Row 2: Top Courses, Review, Credit donut */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Top 5 Courses */}
-        <div className="glass rounded-2xl p-5 space-y-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>Top 5 Courses</h3>
+        <div className="glass-panel rounded-2xl p-5 space-y-4">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Top 5 Courses</h3>
           <div className="space-y-4">
             {topCourses.length === 0 ? (
-              <p className="text-xs text-center py-6" style={{ color: 'var(--muted-foreground)' }}>No marks logged yet</p>
+              <p className="text-xs text-center py-6 text-slate-400">No marks logged yet</p>
             ) : topCourses.map(m => (
               <div key={m.id} className="space-y-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className="font-medium truncate max-w-[170px]" style={{ color: 'var(--foreground)' }}>{m.course_name}</span>
+                  <span className="font-medium truncate max-w-[170px] text-white">{m.course_name}</span>
                   <span className="font-bold text-teal-400">{m.letter_grade || `${m.score}%`}</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/[0.05] rounded-full overflow-hidden">
@@ -257,16 +257,16 @@ export default function AnalysisPage() {
         </div>
 
         {/* Courses to Review */}
-        <div className="glass rounded-2xl p-5 flex flex-col justify-between space-y-4">
+        <div className="glass-panel rounded-2xl p-5 flex flex-col justify-between space-y-4">
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>Courses to Review</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Courses to Review</h3>
             <div className="space-y-4 mt-4">
               {coursesToReview.length === 0 ? (
-                <p className="text-xs text-center py-6" style={{ color: 'var(--muted-foreground)' }}>All courses are in good standing! ✨</p>
+                <p className="text-xs text-center py-6 text-slate-400">All courses are in good standing! ✨</p>
               ) : coursesToReview.map(m => (
                 <div key={m.id} className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="font-medium truncate max-w-[170px]" style={{ color: 'var(--foreground)' }}>{m.course_name}</span>
+                    <span className="font-medium truncate max-w-[170px] text-white">{m.course_name}</span>
                     <span className="font-bold text-amber-500">{m.letter_grade || `${m.score}%`}</span>
                   </div>
                   <div className="h-1.5 w-full bg-white/[0.05] rounded-full overflow-hidden">
@@ -280,7 +280,7 @@ export default function AnalysisPage() {
           {coursesToReview.length > 0 && (
             <div className="flex items-start gap-2.5 p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
               <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>
+              <p className="text-[10px] text-slate-400">
                 {coursesToReview.length} course(s) need attention to optimize your academic trajectory.
               </p>
             </div>
@@ -288,8 +288,8 @@ export default function AnalysisPage() {
         </div>
 
         {/* Credit Hours Donut */}
-        <div className="glass rounded-2xl p-5 flex flex-col items-center justify-between">
-          <h3 className="text-sm font-semibold self-start" style={{ color: 'var(--foreground)' }}>Credit Hours</h3>
+        <div className="glass-panel rounded-2xl p-5 flex flex-col items-center justify-between">
+          <h3 className="text-sm font-semibold self-start text-white">Credit Hours</h3>
           <div className="relative w-36 h-36 flex items-center justify-center my-2">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
               <circle cx="50" cy="50" fill="transparent" r="40" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
@@ -310,23 +310,23 @@ export default function AnalysisPage() {
               )}
             </svg>
             <div className="absolute flex flex-col items-center justify-center">
-              <span className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>{grandTotalCredits}</span>
-              <span className="text-[9px] uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>Total cr</span>
+              <span className="text-xl font-bold text-white">{grandTotalCredits}</span>
+              <span className="text-[9px] uppercase tracking-wider text-slate-400">Total cr</span>
             </div>
           </div>
 
           <div className="w-full space-y-2 mt-2">
             {[
-              { label: 'Verified', value: totalVerifiedCredits, color: 'var(--primary)' },
+              { label: 'Verified', value: totalVerifiedCredits, color: '#10b981' },
               { label: 'Pending', value: totalPendingCredits, color: '#f59e0b' },
               { label: 'Draft', value: totalDraftCredits, color: '#94a3b8' },
             ].map(({ label, value, color }) => (
               <div key={label} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ background: color }}></span>
-                  <span style={{ color: 'var(--muted-foreground)' }}>{label}</span>
+                  <span className="text-slate-400">{label}</span>
                 </div>
-                <span className="font-bold" style={{ color: 'var(--foreground)' }}>{value} cr</span>
+                <span className="font-bold text-white">{value} cr</span>
               </div>
             ))}
           </div>

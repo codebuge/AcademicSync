@@ -78,35 +78,35 @@ export default function TranscriptPage() {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Transcript Submission</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Submission is locked during active evaluations</p>
+          <h1 className="text-2xl font-bold text-white">Transcript Submission</h1>
+          <p className="text-sm mt-1 text-slate-400">Submission is locked during active evaluations</p>
         </div>
 
-        <div className="glass rounded-3xl p-12 flex flex-col items-center text-center animate-slide-up">
+        <div className="glass-panel rounded-3xl p-12 flex flex-col items-center text-center animate-slide-up">
           <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-6"
             style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}>
             <Lock size={36} className="text-red-400" />
           </div>
-          <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Submission Locked</h2>
-          <p className="text-sm max-w-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>
+          <h2 className="text-xl font-semibold mb-2 text-white">Submission Locked</h2>
+          <p className="text-sm max-w-sm mb-6 text-slate-400">
             Transcript upload unlocks in <strong>Semester 2</strong>. You are currently in Semester 1.
           </p>
 
           <div className="w-full max-w-md p-5 rounded-2xl text-left border"
-            style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
-            <h4 className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--foreground)' }}>Unlock Schedule</h4>
+            style={{ background: 'rgba(15,23,42,0.5)', borderColor: 'rgba(255,255,255,0.1)' }}>
+            <h4 className="text-xs font-bold uppercase tracking-wider mb-4 text-white">Unlock Schedule</h4>
             <div className="flex items-start gap-4 mb-4">
               <div className="w-2 h-2 rounded-full mt-1.5 bg-[#8b5cf6]" />
-              <div className="flex-1 border-b pb-2" style={{ borderColor: 'var(--border)' }}>
-                <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>Semester 2 Launch</p>
-                <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Unlock automatic verification & projections</p>
+              <div className="flex-1 border-b pb-2" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+                <p className="text-sm font-medium text-white">Semester 2 Launch</p>
+                <p className="text-xs text-slate-400">Unlock automatic verification & projections</p>
               </div>
             </div>
             <div className="flex items-start gap-4 opacity-60">
               <div className="w-2 h-2 rounded-full mt-1.5" style={{ background: 'var(--primary)' }} />
               <div className="flex-1">
-                <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>Semester 1 Ongoing</p>
-                <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Enter draft marks manually or upload portals</p>
+                <p className="text-sm font-medium text-white">Semester 1 Ongoing</p>
+                <p className="text-xs text-slate-400">Enter draft marks manually or upload portals</p>
               </div>
             </div>
           </div>
@@ -120,18 +120,18 @@ export default function TranscriptPage() {
       {/* Bento Grid Header */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2 space-y-2">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Upload Academic Transcript</h1>
-          <p className="text-sm max-w-2xl" style={{ color: 'var(--muted-foreground)' }}>
+          <h1 className="text-2xl font-bold text-white">Upload Academic Transcript</h1>
+          <p className="text-sm max-w-2xl text-slate-400">
             Upload your official University transcript to sync your academic history. We automatically reconcile existing marks and identify new course enrollments.
           </p>
         </div>
-        <div className="glass rounded-2xl p-5 flex flex-col justify-center border" style={{ borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-2 mb-1.5" style={{ color: 'var(--primary)' }}>
+        <div className="glass-panel rounded-2xl p-5 flex flex-col justify-center border" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+          <div className="flex items-center gap-2 mb-1.5 text-emerald-400">
             <ShieldCheck size={16} />
             <span className="text-xs font-bold uppercase tracking-wider">Status: Submission Open</span>
           </div>
-          <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-            Semester 2 submission is active. Final deadline: <strong style={{ color: 'var(--foreground)' }}>Dec 15th</strong>.
+          <p className="text-xs text-slate-400">
+            Semester 2 submission is active. Final deadline: <strong className="text-white">Dec 15th</strong>.
           </p>
         </div>
       </div>
@@ -143,17 +143,17 @@ export default function TranscriptPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl" style={{ background: 'rgba(45,212,191,0.12)', border: '1px solid rgba(45,212,191,0.2)' }}>
-                <Upload size={16} style={{ color: 'var(--primary)' }} />
+                <Upload size={16} className="text-emerald-400" />
               </div>
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Upload Transcript PDF</h2>
+              <h2 className="text-sm font-semibold text-white">Upload Transcript PDF</h2>
             </div>
           </div>
 
           <div className="max-w-xs">
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--muted-foreground)' }}>Semester Context (optional)</label>
+            <label className="block text-xs font-medium mb-1.5 text-slate-400">Semester Context (optional)</label>
             <input value={semester} onChange={e => setSemester(e.target.value)} placeholder="e.g. Fall 2024 or Semester 2"
               className="w-full px-3 py-2 rounded-xl text-sm"
-              style={{ background: 'var(--muted)', border: '1px solid var(--border)', color: 'var(--foreground)', outline: 'none' }} />
+              style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }} />
           </div>
 
           {uploadError && (
@@ -166,9 +166,9 @@ export default function TranscriptPage() {
 
           {uploading ? (
             <div className="flex flex-col items-center justify-center py-10 gap-3 rounded-2xl"
-              style={{ background: 'var(--muted)', border: '2px dashed var(--border)' }}>
+              style={{ background: 'rgba(15,23,42,0.5)', border: '2px dashed var(--border)' }}>
               <Loader2 size={24} className="animate-spin text-teal-400" />
-              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Parsing and verifying transcript structure...</p>
+              <p className="text-sm text-slate-400">Parsing and verifying transcript structure...</p>
             </div>
           ) : (
             <div
@@ -184,33 +184,33 @@ export default function TranscriptPage() {
               <input id="pdf-input" type="file" accept="application/pdf" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f) }} />
               <div className="w-14 h-14 bg-white/[0.03] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform"
-                style={{ border: '1px solid var(--border)' }}>
+                style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
                 <FileText size={24} className={isDragging ? 'text-teal-400' : 'text-teal-500'} />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>Drop your transcript PDF here</p>
-                <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>or click to browse · PDF only · max 10MB</p>
+                <p className="text-sm font-medium text-white">Drop your transcript PDF here</p>
+                <p className="text-xs mt-1 text-slate-400">or click to browse · PDF only · max 10MB</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Reconciliation Summary */}
-        <div className="lg:col-span-4 glass rounded-2xl p-5 border flex flex-col justify-between" style={{ borderColor: 'var(--border)', minHeight: '330px' }}>
+        <div className="lg:col-span-4 glass rounded-2xl p-5 border flex flex-col justify-between" style={{ borderColor: 'rgba(255,255,255,0.1)', minHeight: '330px' }}>
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--muted-foreground)' }}>Reconciliation Preview</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider mb-4 text-slate-400">Reconciliation Preview</h4>
             <div className="space-y-4">
               {[
                 { label: 'Verified Courses', value: reconciliation ? reconciliation.verified_count : '—', icon: CheckCircle, color: 'hsl(160,84%,50%)', bg: 'rgba(45,212,191,0.08)' },
-                { label: 'New Entries Added', value: reconciliation ? reconciliation.new_count : '—', icon: CheckCircle, color: 'var(--primary)', bg: 'rgba(45,212,191,0.08)' },
+                { label: 'New Entries Added', value: reconciliation ? reconciliation.new_count : '—', icon: CheckCircle, color: '#10b981', bg: 'rgba(45,212,191,0.08)' },
                 { label: 'Unmatched Courses', value: reconciliation ? reconciliation.unmatched.length : '—', icon: AlertCircle, color: 'hsl(38,92%,50%)', bg: 'rgba(245,158,11,0.08)' },
               ].map(({ label, value, icon: Icon, color, bg }) => (
-                <div key={label} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--muted)' }}>
+                <div key={label} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(15,23,42,0.5)' }}>
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: bg }}>
                       <Icon size={16} style={{ color }} />
                     </div>
-                    <span className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>{label}</span>
+                    <span className="text-xs font-medium text-white">{label}</span>
                   </div>
                   <span className="text-base font-bold" style={{ color }}>{value}</span>
                 </div>
@@ -230,8 +230,8 @@ export default function TranscriptPage() {
             )}
           </div>
 
-          <div className="pt-4 border-t border-dashed text-center" style={{ borderColor: 'var(--border)' }}>
-            <p className="text-[10px] italic" style={{ color: 'var(--muted-foreground)' }}>
+          <div className="pt-4 border-t border-dashed text-center" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <p className="text-[10px] italic text-slate-400">
               Syncing will update your GPA and major progress automatically.
             </p>
           </div>
@@ -239,9 +239,9 @@ export default function TranscriptPage() {
       </div>
 
       {/* Transcript History */}
-      <div className="glass rounded-2xl p-5">
+      <div className="glass-panel rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Upload History</h2>
+          <h2 className="text-sm font-semibold text-white">Upload History</h2>
         </div>
 
         {loading ? (
@@ -250,18 +250,18 @@ export default function TranscriptPage() {
           </div>
         ) : transcripts.length === 0 ? (
           <div className="flex items-center justify-center h-24 rounded-xl"
-            style={{ background: 'var(--muted)', border: '1px dashed var(--border)' }}>
-            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No transcripts uploaded yet</p>
+            style={{ background: 'rgba(15,23,42,0.5)', border: '1px dashed var(--border)' }}>
+            <p className="text-sm text-slate-400">No transcripts uploaded yet</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid var(--border)' }}>
+          <div className="overflow-x-auto rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
             <table className="w-full text-sm text-left">
-              <thead style={{ background: 'var(--muted)', borderBottom: '1px solid var(--border)' }}>
+              <thead style={{ background: 'rgba(15,23,42,0.5)', borderBottom: '1px solid var(--border)' }}>
                 <tr>
-                  <th className="py-2.5 px-4 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>File Name</th>
-                  <th className="py-2.5 px-4 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Uploaded Date</th>
-                  <th className="py-2.5 px-4 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Semester</th>
-                  <th className="py-2.5 px-4 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Status</th>
+                  <th className="py-2.5 px-4 text-xs font-semibold text-slate-400">File Name</th>
+                  <th className="py-2.5 px-4 text-xs font-semibold text-slate-400">Uploaded Date</th>
+                  <th className="py-2.5 px-4 text-xs font-semibold text-slate-400">Semester</th>
+                  <th className="py-2.5 px-4 text-xs font-semibold text-slate-400">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -270,15 +270,15 @@ export default function TranscriptPage() {
                     style={{ borderBottom: i < transcripts.length - 1 ? '1px solid var(--border)' : 'none' }}>
                     <td className="py-3 px-4 font-medium flex items-center gap-2">
                       <FileText size={14} className="text-teal-400" />
-                      <span className="truncate max-w-[200px]" style={{ color: 'var(--foreground)' }}>
+                      <span className="truncate max-w-[200px] text-white">
                         {t.semester ? `${t.semester}_Transcript.pdf` : 'Transcript.pdf'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                    <td className="py-3 px-4 text-xs text-slate-400">
                       {new Date(t.created_at).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="text-[11px] px-2 py-0.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--foreground)' }}>
+                      <span className="text-[11px] px-2 py-0.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}>
                         {t.semester || 'Unknown'}
                       </span>
                     </td>

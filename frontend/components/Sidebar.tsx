@@ -54,14 +54,13 @@ export default function Sidebar({
   return (
     <aside
       className={cn(
-        'flex flex-col h-full',
-        'bg-white/[0.03] backdrop-blur-xl border-r border-white/[0.06]',
+        'flex flex-col h-full glass-sidebar',
         'transition-all duration-300 ease-in-out',
         collapsed ? 'w-[68px]' : 'w-[260px]'
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 h-16 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between px-4 h-16 border-b border-white/[0.08]">
         <Link
           href="/"
           className={cn(
@@ -69,7 +68,7 @@ export default function Sidebar({
             collapsed && 'justify-center'
           )}
         >
-          <GraduationCap className="h-7 w-7 text-teal-400 shrink-0" />
+          <GraduationCap className="h-7 w-7 text-emerald-400 shrink-0" />
           {!collapsed && (
             <span className="text-lg font-semibold text-white tracking-tight whitespace-nowrap">
               AcademicSync
@@ -79,7 +78,7 @@ export default function Sidebar({
         {onToggleCollapse && !collapsed && (
           <button
             onClick={onToggleCollapse}
-            className="p-1.5 rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.05] transition-colors"
+            className="p-1.5 rounded-md text-slate-500 hover:text-slate-300 hover:bg-white/[0.05] transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -102,8 +101,8 @@ export default function Sidebar({
                 'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium',
                 'transition-all duration-200 ease-out',
                 isActive
-                  ? 'bg-teal-500/15 text-teal-300 shadow-[inset_0_0_0_1px_rgba(45,212,191,0.2)]'
-                  : 'text-white/50 hover:text-white/80 hover:bg-white/[0.05]',
+                  ? 'bg-emerald-500/15 text-emerald-300 shadow-[inset_0_0_0_1px_rgba(45,212,191,0.2)]'
+                  : 'text-slate-500 hover:text-slate-200 hover:bg-white/[0.05]',
                 collapsed && 'justify-center px-2'
               )}
               title={collapsed ? item.label : undefined}
@@ -118,7 +117,7 @@ export default function Sidebar({
                 <span className="whitespace-nowrap">{item.label}</span>
               )}
               {isActive && !collapsed && (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-400 shadow-[0_0_6px_rgba(45,212,191,0.6)]" />
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(45,212,191,0.6)]" />
               )}
             </Link>
           );
@@ -127,14 +126,14 @@ export default function Sidebar({
 
       {/* User info */}
       {user && (
-        <div className="border-t border-white/[0.06] p-3 space-y-2">
+        <div className="border-t border-white/[0.08] p-3 space-y-2">
           <div
             className={cn(
               'flex items-center gap-3 px-2 py-2 rounded-lg',
               collapsed && 'justify-center px-0'
             )}
           >
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center shrink-0">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shrink-0">
               <span className="text-xs font-bold text-white">
                 {user.full_name
                   ? user.full_name
@@ -169,7 +168,7 @@ export default function Sidebar({
             size={collapsed ? 'icon' : 'sm'}
             onClick={onLogout}
             className={cn(
-              'w-full text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors',
+              'w-full text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors',
               collapsed ? 'h-9 w-9 mx-auto' : 'justify-start gap-2'
             )}
           >
@@ -181,3 +180,4 @@ export default function Sidebar({
     </aside>
   );
 }
+

@@ -86,8 +86,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'var(--muted)', borderTopColor: 'var(--primary)' }} />
+        <div className="w-8 h-8 rounded-full border-2 animate-spin border-slate-700 border-t-emerald-400" />
       </div>
     )
   }
@@ -101,10 +100,10 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+        <h1 className="text-2xl font-bold text-white">
           Welcome back{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''} 👋
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Here&apos;s your academic snapshot</p>
+        <p className="text-sm mt-1 text-slate-400">Here&apos;s your academic snapshot</p>
       </div>
 
       {/* Stats row */}
@@ -119,55 +118,53 @@ export default function DashboardPage() {
         </div>
 
         {[
-          { label: 'Current Semester', value: `Sem ${user?.current_semester ?? 1}`, icon: Calendar, color: 'var(--secondary)' },
-          { label: 'Verified Credits', value: cgpa?.total_verified_credits?.toFixed(1) ?? '0', icon: Award, color: 'var(--primary)' },
-          { label: 'Latest GPA', value: latestGpa.toFixed(2), icon: TrendingUp, color: latestGpa >= 3.5 ? 'hsl(160,84%,50%)' : latestGpa >= 2.5 ? 'hsl(38,92%,50%)' : 'hsl(0,84%,60%)' },
+          { label: 'Current Semester', value: `Sem ${user?.current_semester ?? 1}`, icon: Calendar, color: '#a855f7' },
+          { label: 'Verified Credits', value: cgpa?.total_verified_credits?.toFixed(1) ?? '0', icon: Award, color: '#10b981' },
+          { label: 'Latest GPA', value: latestGpa.toFixed(2), icon: TrendingUp, color: latestGpa >= 3.5 ? '#22c55e' : latestGpa >= 2.5 ? '#f59e0b' : '#ef4444' },
         ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="glass rounded-2xl p-5 hover-lift transition-all duration-200">
+          <div key={label} className="glass-card rounded-2xl p-5 hover-lift transition-all duration-200">
             <div className="flex items-start justify-between mb-3">
-              <p className="text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>{label}</p>
+              <p className="text-xs font-medium text-slate-400">{label}</p>
               <div className="p-2 rounded-xl" style={{ background: `${color}20` }}>
                 <Icon size={16} style={{ color }} />
               </div>
             </div>
-            <p className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>{value}</p>
+            <p className="text-2xl font-bold text-white">{value}</p>
           </div>
         ))}
       </div>
 
       {/* Chart + Recent Marks */}
       <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 glass rounded-2xl p-5">
+        <div className="lg:col-span-2 glass-panel rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>GPA Trend</h2>
-            <BarChart3 size={16} style={{ color: 'var(--muted-foreground)' }} />
+            <h2 className="text-sm font-semibold text-white">GPA Trend</h2>
+            <BarChart3 size={16} className="text-slate-400" />
           </div>
           {chartData.length > 0 ? (
             <GPAChart data={chartData} />
           ) : (
-            <div className="flex items-center justify-center h-48 rounded-xl"
-              style={{ background: 'var(--muted)', border: '1px dashed var(--border)' }}>
-              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No semester data yet</p>
+            <div className="flex items-center justify-center h-48 rounded-xl bg-slate-900/50 border border-dashed border-white/10">
+              <p className="text-sm text-slate-400">No semester data yet</p>
             </div>
           )}
         </div>
 
-        <div className="glass rounded-2xl p-5">
+        <div className="glass-panel rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Recent Marks</h2>
-            <Link href="/marks" className="text-xs flex items-center gap-1 hover:underline" style={{ color: 'var(--primary)' }}>
+            <h2 className="text-sm font-semibold text-white">Recent Marks</h2>
+            <Link href="/marks" className="text-xs flex items-center gap-1 hover:underline text-emerald-400">
               View all <ArrowUpRight size={12} />
             </Link>
           </div>
           <div className="space-y-2">
             {recentMarks.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: 'var(--muted-foreground)' }}>No marks yet</p>
+              <p className="text-sm text-center py-8 text-slate-400">No marks yet</p>
             ) : recentMarks.map(m => (
-              <div key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl transition-colors hover:bg-white/[0.03]"
-                style={{ border: '1px solid var(--border)' }}>
+              <div key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl transition-colors hover:bg-white/[0.03] border border-white/10">
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate" style={{ color: 'var(--foreground)' }}>{m.course_name}</p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>{m.semester}</p>
+                  <p className="text-xs font-medium truncate text-white">{m.course_name}</p>
+                  <p className="text-xs mt-0.5 text-slate-400">{m.semester}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className={`text-xs font-bold ${getGpaColor(m.score / 25)}`}>{m.score}%</p>
@@ -188,13 +185,14 @@ export default function DashboardPage() {
           { label: 'Total Marks', href: '/marks', icon: BarChart3, desc: `${marks.length} courses` },
         ].map(({ label, href, icon: Icon, desc }) => (
           <Link key={label} href={href}
-            className="glass rounded-2xl p-4 flex flex-col gap-2 hover-lift transition-all duration-200 group">
-            <Icon size={18} style={{ color: 'var(--primary)' }} />
-            <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{label}</p>
-            <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{desc}</p>
+            className="glass-card rounded-2xl p-4 flex flex-col gap-2 hover-lift transition-all duration-200 group">
+            <Icon size={18} className="text-emerald-400" />
+            <p className="text-sm font-medium text-white">{label}</p>
+            <p className="text-xs text-slate-400">{desc}</p>
           </Link>
         ))}
       </div>
     </div>
   )
 }
+

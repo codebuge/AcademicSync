@@ -204,13 +204,13 @@ export default function MarksPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Marks Entry</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>Update your academic records for the current semester</p>
+          <h1 className="text-2xl font-bold text-white">Marks Entry</h1>
+          <p className="text-sm mt-1 text-slate-400">Update your academic records for the current semester</p>
         </div>
 
         {/* Tab Switcher */}
         <div className="p-0.5 rounded-full flex items-center border self-start sm:self-auto"
-          style={{ background: 'var(--muted)', borderColor: 'var(--border)' }}>
+          style={{ background: 'rgba(15,23,42,0.5)', borderColor: 'rgba(255,255,255,0.1)' }}>
           <button
             onClick={() => setActiveTab('manual')}
             className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
@@ -236,7 +236,7 @@ export default function MarksPage() {
 
       {successMsg && (
         <div className="p-3 rounded-xl text-sm flex gap-2 animate-slide-down"
-          style={{ background: 'rgba(45,212,191,0.1)', border: '1px solid rgba(45,212,191,0.3)', color: 'var(--primary)' }}>
+          style={{ background: 'rgba(45,212,191,0.1)', border: '1px solid rgba(45,212,191,0.3)', color: '#10b981' }}>
           <CheckCircle size={16} className="shrink-0" />
           {successMsg}
         </div>
@@ -247,8 +247,8 @@ export default function MarksPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Form Card Column */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="glass rounded-2xl p-6 space-y-4">
-              <h3 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>New Entry</h3>
+            <div className="glass-panel rounded-2xl p-6 space-y-4">
+              <h3 className="text-base font-semibold text-white">New Entry</h3>
               
               <form onSubmit={handleSubmit(onSubmitMark)} className="space-y-4">
                 {formError && (
@@ -260,15 +260,15 @@ export default function MarksPage() {
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>Course Name</label>
+                  <label className="block text-xs font-medium text-slate-400">Course Name</label>
                   <input
                     {...register('course_name')}
                     placeholder="e.g. Advanced Calculus"
                     className="w-full px-3 py-2.5 rounded-xl text-sm"
                     style={{
-                      background: 'var(--muted)',
+                      background: 'rgba(15,23,42,0.5)',
                       border: errors.course_name ? '1px solid rgba(239,68,68,0.5)' : '1px solid var(--border)',
-                      color: 'var(--foreground)',
+                      color: 'white',
                       outline: 'none'
                     }}
                   />
@@ -276,15 +276,15 @@ export default function MarksPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>Semester</label>
+                  <label className="block text-xs font-medium text-slate-400">Semester</label>
                   <input
                     {...register('semester')}
                     placeholder="e.g. Semester 3"
                     className="w-full px-3 py-2.5 rounded-xl text-sm"
                     style={{
-                      background: 'var(--muted)',
+                      background: 'rgba(15,23,42,0.5)',
                       border: errors.semester ? '1px solid rgba(239,68,68,0.5)' : '1px solid var(--border)',
-                      color: 'var(--foreground)',
+                      color: 'white',
                       outline: 'none'
                     }}
                   />
@@ -292,8 +292,8 @@ export default function MarksPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>Credits</label>
-                  <div className="flex items-center rounded-xl p-1" style={{ background: 'var(--muted)', border: '1px solid var(--border)' }}>
+                  <label className="block text-xs font-medium text-slate-400">Credits</label>
+                  <div className="flex items-center rounded-xl p-1" style={{ background: 'rgba(15,23,42,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <button
                       type="button"
                       onClick={() => setValue('credit_hours', Math.max(0.5, (creditVal || 3) - 0.5))}
@@ -318,7 +318,7 @@ export default function MarksPage() {
 
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center">
-                    <label className="block text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>Score (0-100)</label>
+                    <label className="block text-xs font-medium text-slate-400">Score (0-100)</label>
                     <span className="text-sm font-bold text-teal-400">{scoreVal}%</span>
                   </div>
                   <div className="pt-2">
@@ -329,7 +329,7 @@ export default function MarksPage() {
                       step="1"
                       {...register('score', { valueAsNumber: true })}
                       className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-[#0F6E56]"
-                      style={{ background: 'var(--border)' }}
+                      style={{ background: 'rgba(255,255,255,0.1)' }}
                     />
                   </div>
                 </div>
@@ -338,7 +338,7 @@ export default function MarksPage() {
                   type="submit"
                   disabled={submitting}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-60 hover-lift mt-2"
-                  style={{ background: 'linear-gradient(135deg, var(--primary), hsl(168,84%,28%))', color: 'white', boxShadow: '0 4px 14px var(--teal-glow)' }}
+                  style={{ background: 'linear-gradient(135deg, var(--primary), hsl(168,84%,28%))', color: 'white', boxShadow: '0 4px 14px rgba(45,212,191,0.15)' }}
                 >
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                   Add Mark
@@ -347,15 +347,15 @@ export default function MarksPage() {
             </div>
 
             {/* Quick Stats Grid Reflow */}
-            <div className="glass rounded-2xl p-5 border flex items-center justify-between gap-4" style={{ borderColor: 'var(--border)' }}>
+            <div className="glass-panel rounded-2xl p-5 border flex items-center justify-between gap-4" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#0F6E56]/15"
                   style={{ border: '1px solid rgba(45,212,191,0.2)' }}>
-                  <Award size={18} style={{ color: 'var(--primary)' }} />
+                  <Award size={18} className="text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--muted-foreground)' }}>Semester Credits</p>
-                  <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{currentSemesterCredits} cr</p>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Semester Credits</p>
+                  <p className="text-lg font-bold text-white">{currentSemesterCredits} cr</p>
                 </div>
               </div>
               <div className="w-px h-8 bg-white/10" />
@@ -365,8 +365,8 @@ export default function MarksPage() {
                   <BookOpen size={18} style={{ color: '#c084fc' }} />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--muted-foreground)' }}>Total Credits</p>
-                  <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{totalCredits} cr</p>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Credits</p>
+                  <p className="text-lg font-bold text-white">{totalCredits} cr</p>
                 </div>
               </div>
             </div>
@@ -374,9 +374,9 @@ export default function MarksPage() {
 
           {/* Table Column */}
           <div className="lg:col-span-7">
-            <div className="glass rounded-2xl p-5">
-              <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--foreground)' }}>
-                Course History <span className="font-normal" style={{ color: 'var(--muted-foreground)' }}>({marks.length})</span>
+            <div className="glass-panel rounded-2xl p-5">
+              <h2 className="text-sm font-semibold mb-4 text-white">
+                Course History <span className="font-normal text-slate-400">({marks.length})</span>
               </h2>
               {loading ? (
                 <div className="flex items-center justify-center h-48">
@@ -407,12 +407,12 @@ export default function MarksPage() {
               <input id="ocr-file-input" type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) handleOcrUpload(f) }} />
               <div className="w-16 h-16 bg-white/[0.03] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform"
-                style={{ border: '1px solid var(--border)' }}>
+                style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
                 <Camera size={28} className={isDragging ? 'text-teal-400' : 'text-teal-500'} />
               </div>
               <div className="text-center">
-                <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Drop your portal screenshot here</h3>
-                <p className="text-xs mt-1 max-w-sm mx-auto" style={{ color: 'var(--muted-foreground)' }}>
+                <h3 className="text-sm font-semibold text-white">Drop your portal screenshot here</h3>
+                <p className="text-xs mt-1 max-w-sm mx-auto text-slate-400">
                   We&apos;ll automatically extract courses, credits, and scores for you. Supports PNG, JPG, and WebP · max 5MB
                 </p>
               </div>
@@ -424,9 +424,9 @@ export default function MarksPage() {
 
           {ocrLoading && (
             <div className="flex flex-col items-center justify-center py-16 gap-4 rounded-2xl"
-              style={{ background: 'var(--muted)', border: '2px dashed var(--border)' }}>
+              style={{ background: 'rgba(15,23,42,0.5)', border: '2px dashed var(--border)' }}>
               <Loader2 size={32} className="animate-spin text-teal-400" />
-              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Scanning your marksheet with AI...</p>
+              <p className="text-sm text-slate-400">Scanning your marksheet with AI...</p>
             </div>
           )}
 
