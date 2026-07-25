@@ -360,7 +360,6 @@ def calculate_public_gpa(
     }
 
 
->>>>>>> 2e98b9e (fix(gpa-calc): separate public and private calculation pathways, fix mark entry and management)
 def get_course_breakdown(
     courses: List[Any],
     grading_scale: str = "4.0",
