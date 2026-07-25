@@ -80,7 +80,7 @@ class TranscriptResponse(BaseModel):
 
 # --- Grading Scale Schemas ---
 class GradingScaleRowCreate(BaseModel):
-    min_percent: float = Field(..., ge=0, le=100)
+    min_percent: Optional[float] = Field(None, ge=0, le=100)
     max_percent: Optional[float] = Field(None, ge=0, le=100)
     letter_grade: str
     gpa_points: Optional[float] = Field(None, ge=0, le=5.0)
@@ -89,7 +89,7 @@ class GradingScaleRowCreate(BaseModel):
 class GradingScaleRowResponse(BaseModel):
     id: str
     user_id: str
-    min_percent: float
+    min_percent: Optional[float] = None
     max_percent: Optional[float] = None
     letter_grade: str
     gpa_points: Optional[float] = None
