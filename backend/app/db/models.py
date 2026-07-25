@@ -79,7 +79,7 @@ class GradingScaleRow(Base):
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    min_percent = Column(Float, nullable=False)
+    min_percent = Column(Float, nullable=True)  # Nullable for non-numeric (I/W/Freeze)
     max_percent = Column(Float, nullable=True)
     letter_grade = Column(String, nullable=False)
     gpa_points = Column(Float, nullable=True)  # Nullable for non-numeric (I/W/Freeze)
