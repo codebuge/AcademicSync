@@ -216,16 +216,23 @@ async def signup(
             detail="Registration failed. Could not retrieve user ID."
         )
 
-    # 5. Insert user profile and grading scale rows into database in a transaction
+    # 5. Insert or update user profile and grading scale rows into database in a transaction
     try:
-        user = User(
-            id=user_id,
-            email=email,
-            full_name=full_name,
-            role="student",
-            current_semester=current_semester
-        )
-        db.add(user)
+        user = db.query(User).filter((User.id == user_id) | (User.email == email)).first()
+        if user:
+            user.id = user_id
+            user.full_name = full_name
+            user.role = "student"
+            user.current_semester = current_semester
+        else:
+            user = User(
+                id=user_id,
+                email=email,
+                full_name=full_name,
+                role="student",
+                current_semester=current_semester
+            )
+            db.add(user)
         
         # Add grading scale rows
         for row in scale_rows:
