@@ -1,20 +1,58 @@
 from typing import List, Optional, Any
 
+# GPA-eligible mark statuses. `verified` marks are still inside an open
+# semester; `locked` marks belong to a semester that SemesterGuard has
+# closed out. Both must count toward GPA/CGPA — only `draft` and
+# `pending_verification` marks are excluded.
+GPA_ELIGIBLE_STATUSES = ("verified", "locked")
+
+DEFAULT_CREDITS_PER_SEMESTER = 15.0
+
+
+class ScoreOutOfRangeError(ValueError):
+    """
+    Raised when a score does not match any row in the grading scale.
+
+    This is a genuine data problem (bad score, or a misconfigured/incomplete
+    scale) and must never be conflated with a score that matched a row which
+    is intentionally excluded from GPA (e.g. Incomplete/Withdrawn/Freeze
+    bands with gpa_points = None). Callers should catch this explicitly
+    rather than treating it the same as an excluded grade.
+    """
+
+    def __init__(self, score: float):
+        self.score = score
+        super().__init__(f"Score {score} does not match any row in the grading scale")
+
+
 def score_to_gpa(score: float, scale_rows: List[Any]) -> Optional[float]:
     """
     Finds the GPA points for a given score based on the user's grading scale.
+
+    Returns:
+        - A float GPA value if the score matches a scored row.
+        - None ONLY if the score matches a row that is intentionally excluded
+          from GPA calculations (row.gpa_points is None by design, e.g. an
+          Incomplete/Withdrawn/Freeze band).
+
+    Raises:
+        ScoreOutOfRangeError: if the score matches no row at all. This is a
+          data/config problem, not an exclusion, and must not be silently
+          swallowed as a None.
     """
     if not scale_rows:
-        # Fallback to standard 4.0 scale if no rows are present
-        if score >= 93: return 4.0
-        elif score >= 90: return 3.7
-        elif score >= 87: return 3.3
-        elif score >= 83: return 3.0
-        elif score >= 80: return 2.7
-        elif score >= 77: return 2.3
-        elif score >= 73: return 2.0
-        elif score >= 70: return 1.7
-        elif score >= 60: return 1.0
+        # Fallback to standard 4.0 scale if no rows are present.
+        # This fallback scale covers 0-100 fully, so it never raises.
+        if score >= 91: return 4.0
+        elif score >= 80: return 3.66
+        elif score >= 75: return 3.3
+        elif score >= 71: return 3.0
+        elif score >= 68: return 2.66
+        elif score >= 64: return 2.33
+        elif score >= 61: return 2.0
+        elif score >= 58: return 1.66
+        elif score >= 54: return 1.33
+        elif score >= 50: return 1.0
         else: return 0.0
 
     matching_rows = [
@@ -22,17 +60,38 @@ def score_to_gpa(score: float, scale_rows: List[Any]) -> Optional[float]:
         if score >= row.min_percent and (row.max_percent is None or score <= row.max_percent)
     ]
     if not matching_rows:
-        return None
-        
+        # No row covers this score at all — that's a data/config issue,
+        # not an intentional exclusion. Never return None here.
+        raise ScoreOutOfRangeError(score)
+
     # Return the row with the highest min_percent threshold
     best_row = max(matching_rows, key=lambda r: r.min_percent)
+    # If gpa_points is None here, it's because THIS row was matched and is
+    # explicitly marked as excluded (e.g. Incomplete/Withdrawn/Freeze band).
     return best_row.gpa_points
 
-def calculate_gpa(marks: List[Any], scale_rows: List[Any] = None) -> float:
+
+def calculate_gpa(
+    marks: List[Any],
+    scale_rows: List[Any] = None,
+    strict: bool = True,
+) -> float:
     """
     Calculate GPA for a single semester.
-    Includes only 'verified' marks (case-insensitive for compatibility).
-    Excludes marks with NULL grade points (Incomplete/Withdrawn/Freeze).
+
+    Includes 'verified' AND 'locked' marks (case-insensitive for
+    compatibility) — locked marks belong to closed-out semesters and must
+    still count toward GPA.
+
+    Excludes marks whose grade is intentionally excluded from GPA
+    (Incomplete/Withdrawn/Freeze), signaled by score_to_gpa returning None.
+
+    Args:
+        strict: if True (default), a score that matches no scale row at all
+            raises ScoreOutOfRangeError instead of being silently dropped.
+            Set to False only for tolerant/preview contexts where you've
+            decided out-of-range scores should be skipped — do this
+            explicitly, never as the default.
     """
     if scale_rows is None:
         scale_rows = []
@@ -41,10 +100,20 @@ def calculate_gpa(marks: List[Any], scale_rows: List[Any] = None) -> float:
     for m in marks:
         # Support both 'status' and old 'verification_status' fields
         status_val = getattr(m, "status", None) or getattr(m, "verification_status", None) or ""
-        if status_val.lower() == "verified":
+        if status_val.lower() not in GPA_ELIGIBLE_STATUSES:
+            continue
+
+        try:
             gp = score_to_gpa(m.score, scale_rows)
-            if gp is not None:
-                eligible_marks.append((gp, m.credit_hours))
+        except ScoreOutOfRangeError:
+            if strict:
+                raise
+            # Explicitly opted into tolerant mode: skip this mark, but this
+            # is a data issue, not an exclusion — don't relabel it as one.
+            continue
+
+        if gp is not None:
+            eligible_marks.append((gp, m.credit_hours))
 
     if not eligible_marks:
         return 0.0
@@ -57,38 +126,45 @@ def calculate_gpa(marks: List[Any], scale_rows: List[Any] = None) -> float:
 
     return round(total_points / total_credits, 2)
 
-def calculate_cgpa(all_marks: List[Any], scale_rows: List[Any] = None) -> float:
+
+def calculate_cgpa(all_marks: List[Any], scale_rows: List[Any] = None, strict: bool = True) -> float:
     """
     Calculate CGPA across all semesters.
-    Includes 'verified' marks ONLY.
-    Excludes marks with NULL grade points (Incomplete/Withdrawn/Freeze).
+    Includes 'verified' AND 'locked' marks. Excludes intentionally-excluded
+    grade types (Incomplete/Withdrawn/Freeze).
     """
-    return calculate_gpa(all_marks, scale_rows)
+    return calculate_gpa(all_marks, scale_rows, strict=strict)
+
 
 def get_cgpa_projection(
     target_cgpa: float,
     remaining_semesters: int,
     current_cgpa: float,
     completed_credits: float,
-    scale_rows: List[Any] = None
+    scale_rows: List[Any] = None,
+    remaining_credits: Optional[float] = None,
+    credits_per_semester: float = DEFAULT_CREDITS_PER_SEMESTER,
 ) -> dict:
     """
     Calculate the required GPA in remaining semesters to achieve target CGPA.
-    Determines if it is achievable based on the max GPA points in the scale.
-    """
-    if remaining_semesters <= 0:
-        return {
-            "required_gpa": 0.0,
-            "achievable": False
-        }
 
-    # Estimate future semesters credit load as 15.0 per semester
-    remaining_credits = remaining_semesters * 15.0
-    total_credits = completed_credits + remaining_credits
-    
-    required_points = (target_cgpa * total_credits) - (current_cgpa * completed_credits)
-    required_gpa = required_points / remaining_credits
-    required_gpa = round(required_gpa, 2)
+    Args:
+        remaining_credits: actual planned credit load for the remaining
+            semesters (e.g. sum of `planned_courses.credit_hours`). If not
+            supplied, falls back to `remaining_semesters * credits_per_semester`.
+        credits_per_semester: only used as a fallback estimate when
+            `remaining_credits` isn't provided — no longer hardcoded to 15.0.
+
+    Returns a dict with:
+        required_gpa: unrounded-precision GPA needed in remaining credits,
+            rounded to 2 dp for display. None if there are no remaining
+            credits to earn.
+        achievable: whether required_gpa is reachable on the scale.
+        already_exceeded: True if the target is already met or beaten with
+            no further credits needed.
+    """
+    if remaining_credits is None:
+        remaining_credits = remaining_semesters * credits_per_semester
 
     # Determine max GPA points from scale_rows (default to 4.0 if not available)
     max_gpa = 4.0
@@ -97,26 +173,104 @@ def get_cgpa_projection(
         if valid_points:
             max_gpa = max(valid_points)
 
-    achievable = required_gpa <= max_gpa and required_gpa >= 0.0
+    # No remaining credits to earn (e.g. graduating, or no more courses
+    # planned) — achievability is just "did you already hit the target?"
+    if remaining_semesters <= 0 or remaining_credits <= 0:
+        already_exceeded = current_cgpa >= target_cgpa
+        return {
+            "required_gpa": None,
+            "achievable": already_exceeded,
+            "already_exceeded": already_exceeded,
+        }
+
+    total_credits = completed_credits + remaining_credits
+    required_points = (target_cgpa * total_credits) - (current_cgpa * completed_credits)
+    required_gpa_unrounded = required_points / remaining_credits
+
+    # A negative required GPA means the target is already exceeded given
+    # current standing — that's a success state, not "unachievable".
+    already_exceeded = required_gpa_unrounded <= 0.0
+
+    # Compare on the UNROUNDED value so a true 4.004 doesn't round down to
+    # 4.0 and read as achievable when it technically isn't.
+    achievable = already_exceeded or required_gpa_unrounded <= max_gpa
+
+    # Round only for display — the achievability check above already used
+    # the unrounded value, so a true 4.004 can't round down to a misleading
+    # "achievable" 4.0.
+    display_required_gpa = round(required_gpa_unrounded, 2)
 
     return {
-        "required_gpa": required_gpa,
-        "achievable": achievable
+        "required_gpa": display_required_gpa,
+        "achievable": achievable,
+        "already_exceeded": already_exceeded,
     }
 
+
 def score_to_letter_grade_default(score: float) -> str:
-    if score >= 93: return "A"
-    elif score >= 90: return "A-"
-    elif score >= 87: return "B+"
-    elif score >= 83: return "B"
-    elif score >= 80: return "B-"
-    elif score >= 77: return "C+"
-    elif score >= 73: return "C"
-    elif score >= 70: return "C-"
-    elif score >= 60: return "D"
+    if score >= 91: return "A"
+    elif score >= 80: return "A-"
+    elif score >= 75: return "B+"
+    elif score >= 71: return "B"
+    elif score >= 68: return "B-"
+    elif score >= 64: return "C+"
+    elif score >= 61: return "C"
+    elif score >= 58: return "C-"
+    elif score >= 54: return "D+"
+    elif score >= 50: return "D"
     else: return "F"
 
-def calculate_gpa_from_courses(courses: List[Any], grading_scale: str = "4.0") -> float:
+
+def _score_to_gpa_for_scale(score: float, grading_scale: str, scale_rows: List[Any]) -> Optional[float]:
+    """
+    Single source of truth for turning a score into GPA points under any
+    supported grading_scale, honoring the institution's actual scale_rows
+    instead of always defaulting to the built-in 4.0 fallback.
+
+    Returns None when the grade is intentionally excluded (never fabricates
+    a substitute value like 0.0/F for an excluded grade).
+    Propagates ScoreOutOfRangeError for genuine out-of-range scores.
+    """
+    if grading_scale == "percentage":
+        return score
+
+    gp_4_0 = score_to_gpa(score, scale_rows)
+    if gp_4_0 is None:
+        # Intentionally excluded grade — do NOT substitute 0.0/F. Preserve
+        # the exclusion signal all the way through.
+        return None
+
+    if grading_scale == "5.0":
+        return round(gp_4_0 * 1.25, 2)
+
+    # "4.0" or any unrecognized scale name falls back to the 4.0 value as-is
+    return gp_4_0
+
+
+def calculate_gpa_from_courses(
+    courses: List[Any],
+    grading_scale: str = "4.0",
+    scale_rows: List[Any] = None,
+    require_verified_status: bool = True,
+) -> float:
+    """
+    Secondary GPA calculation path used for course-level breakdowns/previews.
+
+    IMPORTANT: this now shares scoring logic with score_to_gpa via
+    _score_to_gpa_for_scale instead of maintaining an independent mapping,
+    so it can no longer silently diverge from calculate_gpa/calculate_cgpa.
+
+    Args:
+        scale_rows: the institution's actual grading scale. Previously this
+            function always called score_to_gpa(score, []), ignoring any
+            configured scale — that's fixed here.
+        require_verified_status: if True (default), only counts courses
+            whose status is verified/locked, matching the official GPA path.
+            Set False only for an explicit unverified preview feature.
+    """
+    if scale_rows is None:
+        scale_rows = []
+
     eligible_courses = []
     for c in courses:
         score = getattr(c, "score", None)
@@ -126,15 +280,15 @@ def calculate_gpa_from_courses(courses: List[Any], grading_scale: str = "4.0") -
         if credits is None:
             credits = c.get("credit_hours", 0.0)
 
-        if grading_scale == "4.0":
-            gp = score_to_gpa(score, [])
-        elif grading_scale == "5.0":
-            gp_4_0 = score_to_gpa(score, [])
-            gp = round(gp_4_0 * 1.25, 2) if gp_4_0 is not None else 0.0
-        elif grading_scale == "percentage":
-            gp = score
-        else:
-            gp = score_to_gpa(score, [])
+        if require_verified_status:
+            status_val = getattr(c, "status", None)
+            if status_val is None and isinstance(c, dict):
+                status_val = c.get("status", "")
+            status_val = (status_val or "").lower()
+            if status_val not in GPA_ELIGIBLE_STATUSES:
+                continue
+
+        gp = _score_to_gpa_for_scale(score, grading_scale, scale_rows)
 
         if gp is not None:
             eligible_courses.append((gp, credits))
@@ -150,7 +304,19 @@ def calculate_gpa_from_courses(courses: List[Any], grading_scale: str = "4.0") -
 
     return round(total_points / total_credits, 2)
 
-def get_course_breakdown(courses: List[Any], grading_scale: str = "4.0") -> List[dict]:
+
+def get_course_breakdown(
+    courses: List[Any],
+    grading_scale: str = "4.0",
+    scale_rows: List[Any] = None,
+) -> List[dict]:
+    """
+    Per-course breakdown for display. Shares scoring logic with
+    calculate_gpa_from_courses via _score_to_gpa_for_scale.
+    """
+    if scale_rows is None:
+        scale_rows = []
+
     breakdown = []
     for c in courses:
         score = getattr(c, "score", None)
@@ -159,22 +325,19 @@ def get_course_breakdown(courses: List[Any], grading_scale: str = "4.0") -> List
         name = getattr(c, "course_name", None)
         if name is None:
             name = c.get("course_name", "")
-            
+
         letter_grade = score_to_letter_grade_default(score)
-        
-        if grading_scale == "4.0":
-            gp = score_to_gpa(score, [])
-        elif grading_scale == "5.0":
-            gp_4_0 = score_to_gpa(score, [])
-            gp = round(gp_4_0 * 1.25, 2) if gp_4_0 is not None else 0.0
-        elif grading_scale == "percentage":
-            gp = score
-        else:
-            gp = score_to_gpa(score, [])
-            
+        gp = _score_to_gpa_for_scale(score, grading_scale, scale_rows)
+
         breakdown.append({
             "course_name": name,
             "letter_grade": letter_grade,
-            "grade_points": gp
+            # "value" replaces the old overloaded "grade_points" field name,
+            # since under grading_scale="percentage" this is a raw score,
+            # not a GPA point value — keep the meaning unambiguous.
+            "value": gp,
+            "value_type": "gpa_points" if grading_scale != "percentage" else "percentage",
+            # Kept for backward compatibility with existing callers.
+            "grade_points": gp,
         })
     return breakdown
