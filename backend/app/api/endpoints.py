@@ -3,8 +3,11 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import uuid
+import re
+import time
 from datetime import datetime
 from jose import jwt
+from email_validator import validate_email, EmailNotValidError
 
 from app.db.session import get_db
 from app.db.models import User, Mark, Transcript, GradingScaleRow, GpaHistory
@@ -140,7 +143,6 @@ async def signup(
     If successful, registers the user in Supabase and saves their custom grading scale.
     """
     # Validate email
-    from email_validator import validate_email, EmailNotValidError
     try:
         validate_email(email)
     except EmailNotValidError:
@@ -271,45 +273,64 @@ def login(
                 "email": username,
                 "password": password
             })
-            if res.session:
+            if res and res.session:
                 return {
                     "access_token": res.session.access_token,
                     "token_type": "bearer",
                     "user": res.user
                 }
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Login succeeded but no session was returned — check email confirmation status"
+                )
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Login failed: {str(e)}"
             )
+    else:
+        # Local fallback for tests when Supabase is not configured
+        user = db.query(User).filter(User.email == username).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+        if password == "wrongpassword" or (username in MOCK_USER_PASSWORDS and MOCK_USER_PASSWORDS[username] != password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+        
+        # Generate mock JWT for tests
+        jwt_secret = settings.SUPABASE_JWT_SECRET or settings.SECRET_KEY
+        if not jwt_secret:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="JWT secret configuration is missing."
+            )
+        try:
+            payload = {"sub": user.id, "email": user.email, "role": user.role}
+            token = jwt.encode(payload, jwt_secret, algorithm="HS256")
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to sign JWT token: {str(e)}"
+            )
 
-    # Local fallback for tests
-    user = db.query(User).filter(User.email == username).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
-    if password == "wrongpassword" or (username in MOCK_USER_PASSWORDS and MOCK_USER_PASSWORDS[username] != password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
-    
-    # Generate mock JWT for tests
-    jwt_secret = settings.SUPABASE_JWT_SECRET or settings.SECRET_KEY
-    payload = {"sub": user.id, "email": user.email, "role": user.role}
-    token = jwt.encode(payload, jwt_secret, algorithm="HS256")
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "full_name": user.full_name,
-            "role": user.role
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "role": user.role
+            }
         }
-    }
 
 
 # --- USER PROFILE ENDPOINTS ---
@@ -792,7 +813,6 @@ def get_gpa_history(
         .filter(GpaHistory.student_id == current_user.id)
         .all()
     )
-    import re
     if results:
         results.sort(key=lambda x: int(re.search(r'\d+', x.semester).group()) if re.search(r'\d+', x.semester) else 0)
         return results

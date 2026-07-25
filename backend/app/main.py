@@ -1,18 +1,27 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+import logging
 from app.core.config import settings
 from app.db.session import engine
 from app.db.models import Base
 from app.api.endpoints import router as api_router
 from app.services.semester_guard import SemesterGuardBlocked
 
+logger = logging.getLogger(__name__)
+
+# Startup validation: Ensure JWT signing secret is configured
+if not (settings.SUPABASE_JWT_SECRET or settings.SECRET_KEY):
+    raise RuntimeError("Critical Configuration Error: Neither SUPABASE_JWT_SECRET nor SECRET_KEY is set.")
+
 # Initialize Database tables
 try:
     Base.metadata.create_all(bind=engine)
 except Exception as e:
-    print(f"WARNING: Database table creation failed on startup: {e}")
+    logger.warning(f"Database table creation failed on startup: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -22,10 +31,29 @@ app = FastAPI(
 )
 
 @app.exception_handler(SemesterGuardBlocked)
-async def semester_guard_blocked_handler(request, exc: SemesterGuardBlocked):
+async def semester_guard_blocked_handler(request: Request, exc: SemesterGuardBlocked):
     return JSONResponse(
         status_code=403,
         content={"detail": exc.detail, "code": exc.code}
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    if isinstance(exc, (HTTPException, StarletteHTTPException)):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=getattr(exc, "headers", None)
+        )
+    if isinstance(exc, RequestValidationError):
+        return JSONResponse(
+            status_code=422,
+            content={"detail": exc.errors()}
+        )
+    logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error", "code": "INTERNAL_ERROR"}
     )
 
 
